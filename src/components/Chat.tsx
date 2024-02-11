@@ -20,7 +20,6 @@ import {
 	getFileContent,
 	getFileName,
 	getNotesFromPath,
-	getSendChatContextNotesPrompt,
 	glossaryPrompt,
 	removeUrlsFromSelectionPrompt,
 	rewriteLongerSelectionPrompt,
@@ -28,7 +27,6 @@ import {
 	rewriteShorterSelectionPrompt,
 	rewriteTweetSelectionPrompt,
 	rewriteTweetThreadSelectionPrompt,
-	sendNotesContentPrompt,
 	simplifyPrompt,
 	summarizePrompt,
 	tocPrompt
@@ -37,6 +35,13 @@ import VectorDBManager from '@/vectorDBManager';
 import { EventEmitter } from 'events';
 import { Notice, TFile, Vault } from 'obsidian';
 import React, { useContext, useEffect, useState, } from 'react';
+import {
+	ChatContext,
+	combineChatContext,
+	ContextNote,
+	convertToPrompt,
+	EMPTY_CHAT_CONTEXT
+} from '@/context/contextProvider';
 
 interface CreateEffectOptions {
 	custom_temperature?: number;
@@ -75,24 +80,32 @@ const Chat: React.FC<ChatProps> = ({
 	const [inputMessage, setInputMessage] = useState('');
 	const [abortController, setAbortController] = useState<AbortController | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [storedContext, setStoredContext] = useState<ChatContext>(EMPTY_CHAT_CONTEXT);
 
 	const app = useContext(AppContext);
 
 	const handleSendMessage = async () => {
 		if (!inputMessage) return;
 
-		const userMessage: ChatMessage = {
-			message: inputMessage,
-			sender: USER_SENDER,
-			isVisible: true,
-		};
+		let userMessage: ChatMessage;
 
-		// Add user message to chat history
-		addMessage(userMessage);
-		// Clear input
+		if (!storedContext) {
+			userMessage = {
+				message: inputMessage,
+				sender: USER_SENDER,
+				isVisible: true,
+			};
+
+			addMessage(userMessage);
+		} else {
+			const { visibleMessage, invisibleMessage} = convertToPrompt(storedContext, inputMessage);
+			setStoredContext(EMPTY_CHAT_CONTEXT);
+			userMessage = invisibleMessage;
+			addMessage(visibleMessage);
+		}
+
 		setInputMessage('');
 
-		// Display running dots to indicate loading
 		setLoading(true);
 		await getAIResponse(
 			userMessage,
@@ -159,16 +172,15 @@ const Chat: React.FC<ChatProps> = ({
 			// TODO: there should probably be a better way, obsidian has native link support.
 			const allFiles = app.vault.getFiles();
 			for (const file of allFiles) {
-				try {
-					const content = await getFileContent(file);
-					for (const tag of tags) {
-						if (content?.includes(tag)) {
-							noteFiles.push(file);
-							break;
-						}
+				const content = await getFileContent(file);
+				if (!content) {
+					continue;
+				}
+				for (const tag of tags) {
+					if (content.includes(tag)) {
+						noteFiles.push(file);
+						break;
 					}
-				} catch (e) {
-					console.log(`Failed to read a file ${file}`);
 				}
 			}
 		}
@@ -185,46 +197,34 @@ const Chat: React.FC<ChatProps> = ({
 			noteFiles = [file];
 		}
 
-		const notes = [];
+		const notes: ContextNote[] = [];
 		for (const file of noteFiles) {
 			const content = await getFileContent(file);
-			const fileName = getFileName(file);
+			// this is a relative path, right?
+			const filePath = file.path;
 			if (content) {
-				if (notes.find(s => s.name === fileName) == undefined) {
-					notes.push({ name: fileName, content });
+				if (notes.find(s => s.notePath === filePath) === undefined) {
+					notes.push({ notePath: filePath, noteContent: content });
 				}
 			}
 		}
 
-		// Send the content of the note to AI
-		const promptMessageHidden: ChatMessage = {
-			message: sendNotesContentPrompt(notes),
-			sender: USER_SENDER,
-			isVisible: false,
-		};
+		setStoredContext((prevState) => {
+			const newContext = combineChatContext(prevState, { additionalNotes: notes });
+			console.log(`New context: ${JSON.stringify(newContext)}`);
+			return newContext;
+		})
 
-		// Visible user message that is not sent to AI
-		// const sendNoteContentUserMessage = `Please read the following notes [[${activeNoteContent}]] and be ready to answer questions about it.`;
-		const sendNoteContentUserMessage = getSendChatContextNotesPrompt(notes);
-		const promptMessageVisible: ChatMessage = {
-			message: sendNoteContentUserMessage,
-			sender: USER_SENDER,
-			isVisible: true,
-		};
-
-		addMessage(promptMessageVisible);
-		addMessage(promptMessageHidden);
-
-		setLoading(true);
-		await getAIResponse(
-			promptMessageHidden,
-			chainManager,
-			addMessage,
-			setCurrentAiMessage,
-			setAbortController,
-			{ debug },
-		);
-		setLoading(false);
+		// setLoading(true);
+		// await getAIResponse(
+		// 	promptMessageHidden,
+		// 	chainManager,
+		// 	addMessage,
+		// 	setCurrentAiMessage,
+		// 	setAbortController,
+		// 	{ debug },
+		// );
+		// setLoading(false);
 	};
 
 	const forceRebuildActiveNoteContext = async () => {

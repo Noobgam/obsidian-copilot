@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { ALL_SENDERS } from '@/constants';
 
 export interface ChatMessage {
 	message: string;
-	sender: string;
+	sender: ALL_SENDERS;
 	isVisible: boolean;
 }
 
