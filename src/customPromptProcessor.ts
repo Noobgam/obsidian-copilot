@@ -2,80 +2,81 @@ import { getFileContent, getFileName, getNotesFromPath, processVariableName } fr
 import { Notice, Vault } from 'obsidian';
 
 export interface CustomPrompt {
-  _id: string;
-  _rev?: string;
-  prompt: string;
+	_id: string;
+	_rev?: string;
+	prompt: string;
 }
 
 export class CustomPromptProcessor {
-  private vault: Vault;
-  private static instance: CustomPromptProcessor | null = null;
-  private constructor(vault: Vault) {
-    this.vault = vault;
-  }
+	private static instance: CustomPromptProcessor | null = null;
+	private vault: Vault;
 
-  public static getInstance(vault: Vault): CustomPromptProcessor {
-    if (!CustomPromptProcessor.instance) {
-      CustomPromptProcessor.instance = new CustomPromptProcessor(vault);
-    }
-    return CustomPromptProcessor.instance;
-  }
+	private constructor(vault: Vault) {
+		this.vault = vault;
+	}
 
-  /**
-   * Extract variables and get their content.
-   *
-   * @param {CustomPrompt} doc - the custom prompt to process
-   * @return {Promise<string[]>} the processed custom prompt
-   */
-  async extractVariablesFromPrompt(customPrompt: string): Promise<string[]> {
-    const variablesWithContent: string[] = [];
-    const variableRegex = /\{([^}]+)\}/g;
-    let match;
+	public static getInstance(vault: Vault): CustomPromptProcessor {
+		if (!CustomPromptProcessor.instance) {
+			CustomPromptProcessor.instance = new CustomPromptProcessor(vault);
+		}
+		return CustomPromptProcessor.instance;
+	}
 
-    while ((match = variableRegex.exec(customPrompt)) !== null) {
-      const variableName = match[1].trim();
-      const processedVariableName = processVariableName(variableName);
-      const noteFiles = await getNotesFromPath(this.vault, processedVariableName);
-      const notes = [];
+	/**
+	 * Extract variables and get their content.
+	 *
+	 * @param {CustomPrompt} doc - the custom prompt to process
+	 * @return {Promise<string[]>} the processed custom prompt
+	 */
+	async extractVariablesFromPrompt(customPrompt: string): Promise<string[]> {
+		const variablesWithContent: string[] = [];
+		const variableRegex = /\{([^}]+)\}/g;
+		let match;
 
-      for (const file of noteFiles) {
-        const content = await getFileContent(file);
-        if (content) {
-          notes.push({ name: getFileName(file), content });
-        }
-      }
+		while ((match = variableRegex.exec(customPrompt)) !== null) {
+			const variableName = match[1].trim();
+			const processedVariableName = processVariableName(variableName);
+			const noteFiles = await getNotesFromPath(this.vault, processedVariableName);
+			const notes = [];
 
-      if (notes.length > 0) {
-        variablesWithContent.push(JSON.stringify(notes));
-      } else {
-        new Notice(`Warning: No valid notes found for the provided path '${variableName}'.`);
-      }
-    }
+			for (const file of noteFiles) {
+				const content = await getFileContent(file);
+				if (content) {
+					notes.push({ name: getFileName(file), content });
+				}
+			}
 
-    return variablesWithContent;
-  }
+			if (notes.length > 0) {
+				variablesWithContent.push(JSON.stringify(notes));
+			} else {
+				new Notice(`Warning: No valid notes found for the provided path '${variableName}'.`);
+			}
+		}
 
-  async processCustomPrompt(customPrompt: string, selectedText: string): Promise<string> {
-    const variablesWithContent = await this.extractVariablesFromPrompt(customPrompt);
-    let processedPrompt = customPrompt;
-    let index = 0; // Start with 0 for noteCollection0, noteCollection1, etc.
+		return variablesWithContent;
+	}
 
-    // Replace placeholders with noteCollectionX
-    processedPrompt = processedPrompt.replace(/\{([^}]+)\}/g, () => {
-      return `{noteCollection${index++}}`;
-    });
+	async processCustomPrompt(customPrompt: string, selectedText: string): Promise<string> {
+		const variablesWithContent = await this.extractVariablesFromPrompt(customPrompt);
+		let processedPrompt = customPrompt;
+		let index = 0; // Start with 0 for noteCollection0, noteCollection1, etc.
 
-    let additionalInfo = '';
-    if (processedPrompt.includes('{}')) {
-      // Replace {} with {selectedText}
-      processedPrompt = processedPrompt.replace(/\{\}/g, '{selectedText}');
-      additionalInfo += `selectedText:\n\n ${selectedText}`;
-    }
+		// Replace placeholders with noteCollectionX
+		processedPrompt = processedPrompt.replace(/\{([^}]+)\}/g, () => {
+			return `{noteCollection${index++}}`;
+		});
 
-    for (let i = 0; i < index; i++) {
-      additionalInfo += `\n\nnoteCollection${i}:\n\n${variablesWithContent[i]}`;
-    }
+		let additionalInfo = '';
+		if (processedPrompt.includes('{}')) {
+			// Replace {} with {selectedText}
+			processedPrompt = processedPrompt.replace(/\{\}/g, '{selectedText}');
+			additionalInfo += `selectedText:\n\n ${selectedText}`;
+		}
 
-    return processedPrompt + '\n\n' + additionalInfo;
-  }
+		for (let i = 0; i < index; i++) {
+			additionalInfo += `\n\nnoteCollection${i}:\n\n${variablesWithContent[i]}`;
+		}
+
+		return processedPrompt + '\n\n' + additionalInfo;
+	}
 }
