@@ -214,17 +214,6 @@ const Chat: React.FC<ChatProps> = ({
 			console.log(`New context: ${JSON.stringify(newContext)}`);
 			return newContext;
 		})
-
-		// setLoading(true);
-		// await getAIResponse(
-		// 	promptMessageHidden,
-		// 	chainManager,
-		// 	addMessage,
-		// 	setCurrentAiMessage,
-		// 	setAbortController,
-		// 	{ debug },
-		// );
-		// setLoading(false);
 	};
 
 	const forceRebuildActiveNoteContext = async () => {
