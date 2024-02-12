@@ -1,5 +1,5 @@
-version: "1"
+version: '1'
 rules:
   - base: logan_master
-    upstream: logancyang:master    # change `wei` to the owner of upstream repo
+    upstream: logancyang:master
     mergeMethod: merge
