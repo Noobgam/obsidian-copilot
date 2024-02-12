@@ -18,7 +18,6 @@ function contextIsEmpty(chatContext: ChatContext) {
 	return chatContext.additionalNotes.length == 0;
 }
 
-// TODO: I think we can't do this in react, can we?
 export function combineChatContext(oldValue: ChatContext | null, newValue: ChatContext) {
 	if (oldValue === null) {
 		return newValue;

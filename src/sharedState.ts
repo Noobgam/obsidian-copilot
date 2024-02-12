@@ -49,6 +49,7 @@ export function useSharedState(
 
 	const addMessage = (message: ChatMessage) => {
 		sharedState.addMessage(message);
+		console.log(`Adding message: ${JSON.stringify(message)}`)
 		setChatHistory([...sharedState.getMessages()]);
 	};
 

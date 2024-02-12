@@ -3,6 +3,7 @@ import ReactMarkdown from '@/components/Markdown/MemoizedReactMarkdown';
 import { USER_SENDER } from '@/constants';
 import { ChatMessage } from '@/sharedState';
 import React, { useState } from 'react';
+import remarkGfm from 'remark-gfm'
 
 interface ChatSingleMessageProps {
 	message: ChatMessage;
@@ -39,7 +40,7 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message }) => {
 					{message.sender === USER_SENDER ? (
 						<span>{message.message}</span>
 					) : (
-						<ReactMarkdown>{message.message}</ReactMarkdown>
+						<ReactMarkdown remarkPlugins={[remarkGfm]}>{message.message}</ReactMarkdown>
 					)}
 				</div>
 			</div>

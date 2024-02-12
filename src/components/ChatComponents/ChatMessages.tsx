@@ -2,6 +2,7 @@ import ChatSingleMessage from '@/components/ChatComponents/ChatSingleMessage';
 import { BotIcon } from '@/components/Icons';
 import ReactMarkdown from '@/components/Markdown/MemoizedReactMarkdown';
 import { ChatMessage } from '@/sharedState';
+import remarkGfm from 'remark-gfm'
 import React, { useEffect, useState } from 'react';
 
 interface ChatMessagesProps {
@@ -47,7 +48,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 						<BotIcon/>
 					</div>
 					<div className="message-content">
-						<ReactMarkdown>{currentAiMessage}</ReactMarkdown>
+						<ReactMarkdown remarkPlugins={[remarkGfm]}>{currentAiMessage}</ReactMarkdown>
 					</div>
 				</div>
 			) : (
