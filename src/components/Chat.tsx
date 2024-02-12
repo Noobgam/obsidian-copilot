@@ -9,7 +9,7 @@ import { AppContext } from '@/context';
 import { CustomPromptProcessor } from '@/customPromptProcessor';
 import { getAIResponse } from '@/langchainStream';
 import { CopilotSettings } from '@/settings/SettingsPage';
-import SharedState, { ChatMessage, useSharedState, } from '@/sharedState';
+import SharedState, { ChatMessage, useSharedState } from '@/sharedState';
 import {
 	createChangeToneSelectionPrompt,
 	createTranslateSelectionPrompt,
@@ -29,18 +29,18 @@ import {
 	rewriteTweetThreadSelectionPrompt,
 	simplifyPrompt,
 	summarizePrompt,
-	tocPrompt
+	tocPrompt,
 } from '@/utils';
 import VectorDBManager from '@/vectorDBManager';
 import { EventEmitter } from 'events';
 import { Notice, TFile, Vault } from 'obsidian';
-import React, { useContext, useEffect, useState, } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
 	ChatContext,
 	combineChatContext,
 	ContextNote,
 	convertToPrompt,
-	EMPTY_CHAT_CONTEXT
+	EMPTY_CHAT_CONTEXT,
 } from '@/context/contextProvider';
 
 interface CreateEffectOptions {
@@ -68,19 +68,19 @@ const Chat: React.FC<ChatProps> = ({
 	getChatVisibility,
 	defaultSaveFolder,
 	vault,
-	debug
+	debug,
 }) => {
-	const [
-		chatHistory, addMessage, clearMessages,
-	] = useSharedState(sharedState);
-	const [
-		currentModel, setModel, currentChain, setChain, clearChatMemory,
-	] = useAIState(chainManager);
+	const [chatHistory, addMessage, clearMessages] =
+		useSharedState(sharedState);
+	const [currentModel, setModel, currentChain, setChain, clearChatMemory] =
+		useAIState(chainManager);
 	const [currentAiMessage, setCurrentAiMessage] = useState('');
 	const [inputMessage, setInputMessage] = useState('');
-	const [abortController, setAbortController] = useState<AbortController | null>(null);
+	const [abortController, setAbortController] =
+		useState<AbortController | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [storedContext, setStoredContext] = useState<ChatContext>(EMPTY_CHAT_CONTEXT);
+	const [storedContext, setStoredContext] =
+		useState<ChatContext>(EMPTY_CHAT_CONTEXT);
 
 	const app = useContext(AppContext);
 
@@ -98,7 +98,10 @@ const Chat: React.FC<ChatProps> = ({
 
 			addMessage(userMessage);
 		} else {
-			const { visibleMessage, invisibleMessage} = convertToPrompt(storedContext, inputMessage);
+			const { visibleMessage, invisibleMessage } = convertToPrompt(
+				storedContext,
+				inputMessage
+			);
 			setStoredContext(EMPTY_CHAT_CONTEXT);
 			userMessage = invisibleMessage;
 			addMessage(visibleMessage);
@@ -113,7 +116,7 @@ const Chat: React.FC<ChatProps> = ({
 			addMessage,
 			setCurrentAiMessage,
 			setAbortController,
-			{ debug },
+			{ debug }
 		);
 		setLoading(false);
 	};
@@ -132,7 +135,9 @@ const Chat: React.FC<ChatProps> = ({
 			return;
 		}
 		// Save the chat history as a new note in the vault
-		const chatContent = chatHistory.map((message) => `**${message.sender}**: ${message.message}`).join('\n\n');
+		const chatContent = chatHistory
+			.map((message) => `**${message.sender}**: ${message.message}`)
+			.join('\n\n');
 
 		try {
 			// Check if the default folder exists or create it
@@ -143,7 +148,10 @@ const Chat: React.FC<ChatProps> = ({
 
 			const now = new Date();
 			const noteFileName = `${defaultSaveFolder}/Chat-${formatDateTime(now)}.md`;
-			const newNote: TFile = await app.vault.create(noteFileName, chatContent);
+			const newNote: TFile = await app.vault.create(
+				noteFileName,
+				chatContent
+			);
 			const leaf = app.workspace.getLeaf();
 			leaf.openFile(newNote);
 		} catch (error) {
@@ -160,12 +168,23 @@ const Chat: React.FC<ChatProps> = ({
 		let noteFiles: TFile[] = [];
 
 		if (debug) {
-			console.log('Chat note context path:', settings.chatNoteContextPath);
-			console.log(`Chat note context tags: '${settings.chatNoteContextTags}'`);
+			console.log(
+				'Chat note context path:',
+				settings.chatNoteContextPath
+			);
+			console.log(
+				`Chat note context tags: '${settings.chatNoteContextTags}'`
+			);
 		}
 		if (settings.chatNoteContextPath) {
 			// Recursively get all note TFiles in the path
-			noteFiles = [...noteFiles, ...(await getNotesFromPath(vault, settings.chatNoteContextPath))];
+			noteFiles = [
+				...noteFiles,
+				...(await getNotesFromPath(
+					vault,
+					settings.chatNoteContextPath
+				)),
+			];
 		}
 		if (settings.chatNoteContextTags) {
 			const tags = settings.chatNoteContextTags.split(',');
@@ -193,7 +212,9 @@ const Chat: React.FC<ChatProps> = ({
 				console.error('No active note found.');
 				return;
 			}
-			new Notice('No valid Chat context provided. Defaulting to the active note.');
+			new Notice(
+				'No valid Chat context provided. Defaulting to the active note.'
+			);
 			noteFiles = [file];
 		}
 
@@ -203,17 +224,19 @@ const Chat: React.FC<ChatProps> = ({
 			// this is a relative path, right?
 			const filePath = file.path;
 			if (content) {
-				if (notes.find(s => s.notePath === filePath) === undefined) {
+				if (notes.find((s) => s.notePath === filePath) === undefined) {
 					notes.push({ notePath: filePath, noteContent: content });
 				}
 			}
 		}
 
 		setStoredContext((prevState) => {
-			const newContext = combineChatContext(prevState, { additionalNotes: notes });
+			const newContext = combineChatContext(prevState, {
+				additionalNotes: notes,
+			});
 			console.log(`New context: ${JSON.stringify(newContext)}`);
 			return newContext;
-		})
+		});
 	};
 
 	const forceRebuildActiveNoteContext = async () => {
@@ -265,7 +288,8 @@ const Chat: React.FC<ChatProps> = ({
 	useEffect(() => {
 		async function handleSelection(selectedText: string) {
 			const wordCount = selectedText.split(' ').length;
-			const tokenCount = await chainManager.chatModelManager.countTokens(selectedText);
+			const tokenCount =
+				await chainManager.chatModelManager.countTokens(selectedText);
 			const tokenCountMessage: ChatMessage = {
 				sender: AI_SENDER,
 				message: `The selected text contains ${wordCount} words and ${tokenCount} tokens.`,
@@ -285,17 +309,26 @@ const Chat: React.FC<ChatProps> = ({
 	// Create an effect for each event type (Copilot command on selected text)
 	const createEffect = (
 		eventType: string,
-		promptFn: (selectedText: string, eventSubtype?: string) => string | Promise<string>,
-		options: CreateEffectOptions = {},
+		promptFn: (
+			selectedText: string,
+			eventSubtype?: string
+		) => string | Promise<string>,
+		options: CreateEffectOptions = {}
 	) => {
 		return () => {
 			const {
 				custom_temperature,
 				isVisible = false,
-				ignoreSystemMessage = true,  // Ignore system message by default for commands
+				ignoreSystemMessage = true, // Ignore system message by default for commands
 			} = options;
-			const handleSelection = async (selectedText: string, eventSubtype?: string) => {
-				const messageWithPrompt = await promptFn(selectedText, eventSubtype);
+			const handleSelection = async (
+				selectedText: string,
+				eventSubtype?: string
+			) => {
+				const messageWithPrompt = await promptFn(
+					selectedText,
+					eventSubtype
+				);
 				// Create a user message with the selected text
 				const promptMessage: ChatMessage = {
 					message: messageWithPrompt,
@@ -310,7 +343,9 @@ const Chat: React.FC<ChatProps> = ({
 				// Have a hardcoded custom temperature for some commands that need more strictness
 				chainManager.langChainParams = {
 					...chainManager.langChainParams,
-					...(custom_temperature && { temperature: custom_temperature }),
+					...(custom_temperature && {
+						temperature: custom_temperature,
+					}),
 				};
 
 				setLoading(true);
@@ -337,29 +372,52 @@ const Chat: React.FC<ChatProps> = ({
 		};
 	};
 
-	useEffect(createEffect('fixGrammarSpellingSelection', fixGrammarSpellingSelectionPrompt), []);
+	useEffect(
+		createEffect(
+			'fixGrammarSpellingSelection',
+			fixGrammarSpellingSelectionPrompt
+		),
+		[]
+	);
 	useEffect(createEffect('summarizeSelection', summarizePrompt), []);
 	useEffect(createEffect('tocSelection', tocPrompt), []);
 	useEffect(createEffect('glossarySelection', glossaryPrompt), []);
 	useEffect(createEffect('simplifySelection', simplifyPrompt), []);
 	useEffect(createEffect('emojifySelection', emojifyPrompt), []);
-	useEffect(createEffect('removeUrlsFromSelection', removeUrlsFromSelectionPrompt), []);
 	useEffect(
-		createEffect(
-			'rewriteTweetSelection', rewriteTweetSelectionPrompt, { custom_temperature: 0.2 },
-		),
+		createEffect('removeUrlsFromSelection', removeUrlsFromSelectionPrompt),
+		[]
+	);
+	useEffect(
+		createEffect('rewriteTweetSelection', rewriteTweetSelectionPrompt, {
+			custom_temperature: 0.2,
+		}),
 		[]
 	);
 	useEffect(
 		createEffect(
-			'rewriteTweetThreadSelection', rewriteTweetThreadSelectionPrompt, { custom_temperature: 0.2 },
+			'rewriteTweetThreadSelection',
+			rewriteTweetThreadSelectionPrompt,
+			{ custom_temperature: 0.2 }
 		),
 		[]
 	);
-	useEffect(createEffect('rewriteShorterSelection', rewriteShorterSelectionPrompt), []);
-	useEffect(createEffect('rewriteLongerSelection', rewriteLongerSelectionPrompt), []);
+	useEffect(
+		createEffect('rewriteShorterSelection', rewriteShorterSelectionPrompt),
+		[]
+	);
+	useEffect(
+		createEffect('rewriteLongerSelection', rewriteLongerSelectionPrompt),
+		[]
+	);
 	useEffect(createEffect('eli5Selection', eli5SelectionPrompt), []);
-	useEffect(createEffect('rewritePressReleaseSelection', rewritePressReleaseSelectionPrompt), []);
+	useEffect(
+		createEffect(
+			'rewritePressReleaseSelection',
+			rewritePressReleaseSelectionPrompt
+		),
+		[]
+	);
 	useEffect(
 		createEffect('translateSelection', (selectedText, language) =>
 			createTranslateSelectionPrompt(language)(selectedText)
@@ -381,9 +439,16 @@ const Chat: React.FC<ChatProps> = ({
 				if (!customPrompt) {
 					return selectedText;
 				}
-				return await customPromptProcessor.processCustomPrompt(customPrompt, selectedText);
+				return await customPromptProcessor.processCustomPrompt(
+					customPrompt,
+					selectedText
+				);
 			},
-			{ isVisible: debug, ignoreSystemMessage: true, custom_temperature: 0.1 },
+			{
+				isVisible: debug,
+				ignoreSystemMessage: true,
+				custom_temperature: 0.1,
+			}
 		),
 		[]
 	);
@@ -395,9 +460,16 @@ const Chat: React.FC<ChatProps> = ({
 				if (!customPrompt) {
 					return selectedText;
 				}
-				return await customPromptProcessor.processCustomPrompt(customPrompt, selectedText);
+				return await customPromptProcessor.processCustomPrompt(
+					customPrompt,
+					selectedText
+				);
 			},
-			{ isVisible: debug, ignoreSystemMessage: true, custom_temperature: 0.1 },
+			{
+				isVisible: debug,
+				ignoreSystemMessage: true,
+				custom_temperature: 0.1,
+			}
 		),
 		[]
 	);
@@ -416,16 +488,16 @@ const Chat: React.FC<ChatProps> = ({
 					currentChain={currentChain}
 					setCurrentChain={setChain}
 					onStopGenerating={handleStopGenerating}
-					onNewChat={
-						() => {
-							clearMessages();
-							clearChatMemory();
-							clearCurrentAiMessage();
-						}
-					}
+					onNewChat={() => {
+						clearMessages();
+						clearChatMemory();
+						clearCurrentAiMessage();
+					}}
 					onSaveAsNote={handleSaveAsNote}
 					onSendActiveNoteToPrompt={handleSendActiveNoteToPrompt}
-					onForceRebuildActiveNoteContext={forceRebuildActiveNoteContext}
+					onForceRebuildActiveNoteContext={
+						forceRebuildActiveNoteContext
+					}
 					addMessage={addMessage}
 				/>
 				<ChatInput

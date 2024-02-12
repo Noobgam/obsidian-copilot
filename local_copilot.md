@@ -5,8 +5,9 @@
 [LM Studio](https://lmstudio.ai/) has the best UI for running local models, it has support for Apple Silicon, Windows, and Linux (in beta). After you download the correct version of LM Studio to your machine, the first thing is to download a model. Find something small to start with, such as Mistral 7B, and work your way up if you have a beefy machine.
 
 A rule of thumb to determine how large a model you can run:
-- If you are on an Apple Silicon Mac, look at your RAM
-- If you are on a Windows PC with a GPU, look at your VRAM.
+
+-   If you are on an Apple Silicon Mac, look at your RAM
+-   If you are on a Windows PC with a GPU, look at your VRAM.
 
 After you set your model and preset, you are free to test it out in LM Studio's Chat tab, making sure everything is working. Now you can find the Local Server tab, make sure you have `CORS` enabled, turn on hardware acceleration based on the type of device you have, and click Start Server. This will enable Copilot for Obsidian to access it.
 

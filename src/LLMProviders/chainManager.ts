@@ -8,7 +8,11 @@ import VectorDBManager, { MemoryVector } from '@/vectorDBManager';
 import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { BaseChatMemory } from 'langchain/memory';
-import { ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder } from 'langchain/prompts';
+import {
+	ChatPromptTemplate,
+	HumanMessagePromptTemplate,
+	MessagesPlaceholder,
+} from 'langchain/prompts';
 import { MultiQueryRetriever } from 'langchain/retrievers/multi_query';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
@@ -37,13 +41,13 @@ export default class ChainManager {
 	 * @param {LangChainParams} langChainParams - the parameters for language chaining
 	 * @return {void}
 	 */
-	constructor(
-		langChainParams: LangChainParams
-	) {
+	constructor(langChainParams: LangChainParams) {
 		// Instantiate singletons
 		this.langChainParams = langChainParams;
 		this.memoryManager = MemoryManager.getInstance(this.langChainParams);
-		this.chatModelManager = ChatModelManager.getInstance(this.langChainParams);
+		this.chatModelManager = ChatModelManager.getInstance(
+			this.langChainParams
+		);
 		this.promptManager = PromptManager.getInstance(this.langChainParams);
 		this.createChainWithNewModel(this.langChainParams.modelDisplayName);
 	}
@@ -56,8 +60,10 @@ export default class ChainManager {
 	 * @return {void}
 	 */
 	createChainWithNewModel(newModelDisplayName: string): void {
-		ChainManager.isOllamaModelActive = newModelDisplayName === ChatModelDisplayNames.OLLAMA;
-		ChainManager.isOpenRouterModelActive = newModelDisplayName === ChatModelDisplayNames.OPENROUTERAI;
+		ChainManager.isOllamaModelActive =
+			newModelDisplayName === ChatModelDisplayNames.OLLAMA;
+		ChainManager.isOpenRouterModelActive =
+			newModelDisplayName === ChatModelDisplayNames.OPENROUTERAI;
 		// model and model display name must be update at the same time!
 		let newModel = getModelName(newModelDisplayName);
 
@@ -80,10 +86,10 @@ export default class ChainManager {
 			// Must update the chatModel for chain because ChainFactory always
 			// retrieves the old chain without the chatModel change if it exists!
 			// Create a new chain with the new chatModel
-			this.createChain(
-				this.langChainParams.chainType,
-				{ ...this.langChainParams.options, forceNewCreation: true },
-			);
+			this.createChain(this.langChainParams.chainType, {
+				...this.langChainParams.options,
+				forceNewCreation: true,
+			});
 			console.log(`Setting model to ${newModelDisplayName}: ${newModel}`);
 		} catch (error) {
 			console.error('createChainWithNewModel failed: ', error);
@@ -92,10 +98,7 @@ export default class ChainManager {
 	}
 
 	/* Create a new chain, or update chain with new model */
-	createChain(
-		chainType: ChainType,
-		options?: SetChainOptions,
-	): void {
+	createChain(chainType: ChainType, options?: SetChainOptions): void {
 		this.validateChainType(chainType);
 		try {
 			this.setChain(chainType, options);
@@ -107,9 +110,13 @@ export default class ChainManager {
 
 	async setChain(
 		chainType: ChainType,
-		options: SetChainOptions = {},
+		options: SetChainOptions = {}
 	): Promise<void> {
-		if (!this.chatModelManager.validateChatModel(this.chatModelManager.getChatModel())) {
+		if (
+			!this.chatModelManager.validateChatModel(
+				this.chatModelManager.getChatModel()
+			)
+		) {
 			// No need to throw error and trigger multiple Notices to user
 			console.error('setChain failed: No chat model set.');
 			return;
@@ -117,7 +124,9 @@ export default class ChainManager {
 		this.validateChainType(chainType);
 		// MUST set embeddingsManager when switching to QA mode
 		if (chainType === ChainType.RETRIEVAL_QA_CHAIN) {
-			this.embeddingsManager = EmbeddingsManager.getInstance(this.langChainParams);
+			this.embeddingsManager = EmbeddingsManager.getInstance(
+				this.langChainParams
+			);
 		}
 
 		// Get chatModel, memory, prompt, and embeddingAPI from respective managers
@@ -131,9 +140,11 @@ export default class ChainManager {
 				if (options.forceNewCreation) {
 					// setChain is async, this is to ensure Ollama has the right model passed in from the setting
 					if (ChainManager.isOllamaModelActive) {
-						(chatModel as ChatOllama).model = this.langChainParams.ollamaModel;
+						(chatModel as ChatOllama).model =
+							this.langChainParams.ollamaModel;
 					} else if (ChainManager.isOpenRouterModelActive) {
-						(chatModel as ProxyChatOpenAI).modelName = this.langChainParams.openRouterModel;
+						(chatModel as ProxyChatOpenAI).modelName =
+							this.langChainParams.openRouterModel;
 					}
 
 					ChainManager.chain = ChainFactory.createNewLLMChain({
@@ -162,26 +173,37 @@ export default class ChainManager {
 				}
 
 				this.setNoteContent(options.noteContent);
-				const docHash = VectorDBManager.getDocumentHash(options.noteContent);
-				const parsedMemoryVectors: MemoryVector[] | undefined = await VectorDBManager.getMemoryVectors(docHash);
+				const docHash = VectorDBManager.getDocumentHash(
+					options.noteContent
+				);
+				const parsedMemoryVectors: MemoryVector[] | undefined =
+					await VectorDBManager.getMemoryVectors(docHash);
 				if (parsedMemoryVectors) {
 					// Index already exists
-					const embeddingsAPI = this.embeddingsManager.getEmbeddingsAPI();
+					const embeddingsAPI =
+						this.embeddingsManager.getEmbeddingsAPI();
 					if (!embeddingsAPI) {
-						console.error('Error getting embeddings API. Please check your settings.');
+						console.error(
+							'Error getting embeddings API. Please check your settings.'
+						);
 						return;
 					}
-					const vectorStore = await VectorDBManager.rebuildMemoryVectorStore(
-						parsedMemoryVectors,
-						embeddingsAPI,
-					);
+					const vectorStore =
+						await VectorDBManager.rebuildMemoryVectorStore(
+							parsedMemoryVectors,
+							embeddingsAPI
+						);
 
 					// Create new conversational retrieval chain
-					ChainManager.retrievalChain = ChainFactory.createConversationalRetrievalChain({
-						llm: chatModel,
-						retriever: vectorStore.asRetriever(),
-					});
-					console.log('Existing vector store for document hash: ', docHash);
+					ChainManager.retrievalChain =
+						ChainFactory.createConversationalRetrievalChain({
+							llm: chatModel,
+							retriever: vectorStore.asRetriever(),
+						});
+					console.log(
+						'Existing vector store for document hash: ',
+						docHash
+					);
 				} else {
 					// Index doesn't exist
 					await this.buildIndex(options.noteContent, docHash);
@@ -196,13 +218,15 @@ export default class ChainManager {
 						verbose: false,
 					});
 
-					ChainManager.retrievalChain = ChainFactory.createConversationalRetrievalChain({
-						llm: chatModel,
-						retriever: retriever,
-					});
+					ChainManager.retrievalChain =
+						ChainFactory.createConversationalRetrievalChain({
+							llm: chatModel,
+							retriever: retriever,
+						});
 					console.log(
-						'New conversational retrieval qa chain with multi-query retriever created for '
-						+ 'document hash: ', docHash
+						'New conversational retrieval qa chain with multi-query retriever created for ' +
+							'document hash: ',
+						docHash
 					);
 				}
 
@@ -222,19 +246,21 @@ export default class ChainManager {
 		updateCurrentAiMessage: (message: string) => void,
 		addMessage: (message: ChatMessage) => void,
 		options: {
-			debug?: boolean,
-			ignoreSystemMessage?: boolean,
-			updateLoading?: (loading: boolean) => void
-		} = {},
+			debug?: boolean;
+			ignoreSystemMessage?: boolean;
+			updateLoading?: (loading: boolean) => void;
+		} = {}
 	) {
-		const {
-			debug = false,
-			ignoreSystemMessage = false,
-		} = options;
+		const { debug = false, ignoreSystemMessage = false } = options;
 
 		// Check if chat model is initialized
-		if (!this.chatModelManager.validateChatModel(this.chatModelManager.getChatModel())) {
-			const errorMsg = 'Chat model is not initialized properly, check your API key in Copilot setting and make sure you have API access.';
+		if (
+			!this.chatModelManager.validateChatModel(
+				this.chatModelManager.getChatModel()
+			)
+		) {
+			const errorMsg =
+				'Chat model is not initialized properly, check your API key in Copilot setting and make sure you have API access.';
 			new Notice(errorMsg);
 			console.error(errorMsg);
 			return;
@@ -245,7 +271,10 @@ export default class ChainManager {
 				'Chain is not initialized properly, re-initializing chain: ',
 				this.langChainParams.chainType
 			);
-			this.setChain(this.langChainParams.chainType, this.langChainParams.options);
+			this.setChain(
+				this.langChainParams.chainType,
+				this.langChainParams.options
+			);
 		}
 
 		const {
@@ -263,9 +292,9 @@ export default class ChainManager {
 		if (ignoreSystemMessage) {
 			const effectivePrompt = ignoreSystemMessage
 				? ChatPromptTemplate.fromMessages([
-					new MessagesPlaceholder('history'),
-					HumanMessagePromptTemplate.fromTemplate('{input}'),
-				])
+						new MessagesPlaceholder('history'),
+						HumanMessagePromptTemplate.fromTemplate('{input}'),
+					])
 				: chatPrompt;
 
 			this.setChain(chainType, {
@@ -280,23 +309,29 @@ export default class ChainManager {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const chatModel = (ChainManager.chain as any).last.bound;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const chatStream = await ChainManager.chain.stream({ input: userMessage } as any);
+		const chatStream = await ChainManager.chain.stream({
+			input: userMessage,
+		} as any);
 
 		try {
 			switch (chainType) {
 				case ChainType.LLM_CHAIN:
 					if (debug) {
-						console.log(`*** DEBUG INFO ***\n`
-							+ `user message: ${userMessage}\n`
-							// ChatOpenAI has modelName, some other ChatModels like ChatOllama have model
-							+ `model: ${chatModel.modelName || chatModel.model}\n`
-							+ `chain type: ${chainType}\n`
-							+ `temperature: ${temperature}\n`
-							+ `maxTokens: ${maxTokens}\n`
-							+ `system prompt: ${systemPrompt}\n`
-							+ `chat context turns: ${chatContextTurns}\n`,
+						console.log(
+							`*** DEBUG INFO ***\n` +
+								`user message: ${userMessage}\n` +
+								// ChatOpenAI has modelName, some other ChatModels like ChatOllama have model
+								`model: ${chatModel.modelName || chatModel.model}\n` +
+								`chain type: ${chainType}\n` +
+								`temperature: ${temperature}\n` +
+								`maxTokens: ${maxTokens}\n` +
+								`system prompt: ${systemPrompt}\n` +
+								`chat context turns: ${chatContextTurns}\n`
 						);
-						console.log('chain RunnableSequence:', ChainManager.chain);
+						console.log(
+							'chain RunnableSequence:',
+							ChainManager.chain
+						);
 						console.log('Chat memory:', memory);
 					}
 
@@ -308,30 +343,44 @@ export default class ChainManager {
 					break;
 				case ChainType.RETRIEVAL_QA_CHAIN:
 					if (debug) {
-						console.log(`*** DEBUG INFO ***\n`
-							+ `user message: ${userMessage}\n`
-							+ `model: ${chatModel.modelName || chatModel.model}\n`
-							+ `chain type: ${chainType}\n`
-							+ `temperature: ${temperature}\n`
-							+ `maxTokens: ${maxTokens}\n`
-							+ `system prompt: ${systemPrompt}\n`
-							+ `chat context turns: ${chatContextTurns}\n`,
+						console.log(
+							`*** DEBUG INFO ***\n` +
+								`user message: ${userMessage}\n` +
+								`model: ${chatModel.modelName || chatModel.model}\n` +
+								`chain type: ${chainType}\n` +
+								`temperature: ${temperature}\n` +
+								`maxTokens: ${maxTokens}\n` +
+								`system prompt: ${systemPrompt}\n` +
+								`chat context turns: ${chatContextTurns}\n`
 						);
-						console.log('chain RunnableSequence:', ChainManager.chain);
-						console.log('embedding provider:', this.langChainParams.embeddingProvider);
+						console.log(
+							'chain RunnableSequence:',
+							ChainManager.chain
+						);
+						console.log(
+							'embedding provider:',
+							this.langChainParams.embeddingProvider
+						);
 					}
 					fullAIResponse = await this.runRetrievalChain(
-						userMessage, memory, updateCurrentAiMessage, abortController
+						userMessage,
+						memory,
+						updateCurrentAiMessage,
+						abortController
 					);
 					break;
 				default:
-					console.error('Chain type not supported:', this.langChainParams.chainType);
+					console.error(
+						'Chain type not supported:',
+						this.langChainParams.chainType
+					);
 			}
 		} catch (error) {
 			const errorData = error?.response?.data?.error || error;
 			const errorCode = errorData?.code || error;
 			if (errorCode === 'model_not_found') {
-				const modelNotFoundMsg = 'You do not have access to this model or the model does not exist, please check with your API provider.';
+				const modelNotFoundMsg =
+					'You do not have access to this model or the model does not exist, please check with your API provider.';
 				new Notice(modelNotFoundMsg);
 				console.error(modelNotFoundMsg);
 			} else {
@@ -360,26 +409,39 @@ export default class ChainManager {
 		// Note: HF can give 503 errors frequently (it's free)
 		console.log('Creating vector store...');
 		try {
-			const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+			const textSplitter = new RecursiveCharacterTextSplitter({
+				chunkSize: 1000,
+			});
 
 			const docs = await textSplitter.createDocuments([noteContent]);
 			const embeddingsAPI = this.embeddingsManager.getEmbeddingsAPI();
 			if (!embeddingsAPI) {
-				const errorMsg = 'Failed to create vector store, embedding API is not set correctly, please check your settings.';
+				const errorMsg =
+					'Failed to create vector store, embedding API is not set correctly, please check your settings.';
 				new Notice(errorMsg);
 				console.error(errorMsg);
 				return;
 			}
 			this.vectorStore = await MemoryVectorStore.fromDocuments(
-				docs, embeddingsAPI,
+				docs,
+				embeddingsAPI
 			);
 			// Serialize and save vector store to PouchDB
-			VectorDBManager.setMemoryVectors(this.vectorStore.memoryVectors, docHash);
+			VectorDBManager.setMemoryVectors(
+				this.vectorStore.memoryVectors,
+				docHash
+			);
 			console.log('Vector store created successfully.');
 			new Notice('Vector store created successfully.');
 		} catch (error) {
-			new Notice('Failed to create vector store, please try again:', error);
-			console.error('Failed to create vector store, please try again.:', error);
+			new Notice(
+				'Failed to create vector store, please try again:',
+				error
+			);
+			console.error(
+				'Failed to create vector store, please try again.:',
+				error
+			);
 		}
 	}
 
@@ -388,14 +450,15 @@ export default class ChainManager {
 	}
 
 	private validateChainType(chainType: ChainType): void {
-		if (chainType === undefined || chainType === null) throw new Error('No chain type set');
+		if (chainType === undefined || chainType === null)
+			throw new Error('No chain type set');
 	}
 
 	private async runRetrievalChain(
 		userMessage: string,
 		memory: BaseChatMemory,
 		updateCurrentAiMessage: (message: string) => void,
-		abortController: AbortController,
+		abortController: AbortController
 	): Promise<string> {
 		const memoryVariables = await memory.loadMemoryVariables({});
 		const chatHistory = extractChatHistory(memoryVariables);

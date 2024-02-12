@@ -40,13 +40,21 @@ type ToggleComponentProps = {
 	description?: string;
 	value: boolean;
 	onChange: (value: boolean) => void;
-}
+};
 
-const DropdownComponent: React.FC<DropdownComponentProps> = ({ name, description, options, value, onChange }) => {
+const DropdownComponent: React.FC<DropdownComponentProps> = ({
+	name,
+	description,
+	options,
+	value,
+	onChange,
+}) => {
 	return (
 		<div className="copilot-setting-item">
 			<div className="copilot-setting-item-name">{name}</div>
-			<div className="copilot-setting-item-description">{description}</div>
+			<div className="copilot-setting-item-description">
+				{description}
+			</div>
 			<select
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
@@ -62,11 +70,20 @@ const DropdownComponent: React.FC<DropdownComponentProps> = ({ name, description
 	);
 };
 
-const TextComponent: React.FC<TextComponentProps> = ({ name, description, placeholder, value, type, onChange }) => {
+const TextComponent: React.FC<TextComponentProps> = ({
+	name,
+	description,
+	placeholder,
+	value,
+	type,
+	onChange,
+}) => {
 	return (
 		<div className="copilot-setting-item">
 			<div className="copilot-setting-item-name">{name}</div>
-			<div className="copilot-setting-item-description">{description}</div>
+			<div className="copilot-setting-item-description">
+				{description}
+			</div>
 			<input
 				type={type || 'text'}
 				className="copilot-setting-item-control"
@@ -78,11 +95,19 @@ const TextComponent: React.FC<TextComponentProps> = ({ name, description, placeh
 	);
 };
 
-const TextAreaComponent: React.FC<TextAreaComponentProps> = ({ name, description, placeholder, value, onChange }) => {
+const TextAreaComponent: React.FC<TextAreaComponentProps> = ({
+	name,
+	description,
+	placeholder,
+	value,
+	onChange,
+}) => {
 	return (
 		<div className="copilot-setting-item">
 			<div className="copilot-setting-item-name">{name}</div>
-			<div className="copilot-setting-item-description">{description}</div>
+			<div className="copilot-setting-item-description">
+				{description}
+			</div>
 			<textarea
 				className="copilot-setting-item-control"
 				placeholder={placeholder}
@@ -93,11 +118,21 @@ const TextAreaComponent: React.FC<TextAreaComponentProps> = ({ name, description
 	);
 };
 
-const SliderComponent: React.FC<SliderComponentProps> = ({ name, description, min, max, step, value, onChange }) => {
+const SliderComponent: React.FC<SliderComponentProps> = ({
+	name,
+	description,
+	min,
+	max,
+	step,
+	value,
+	onChange,
+}) => {
 	return (
 		<div className="copilot-setting-item">
 			<div className="copilot-setting-item-name">{name}</div>
-			<div className="copilot-setting-item-description">{description}</div>
+			<div className="copilot-setting-item-description">
+				{description}
+			</div>
 			<div style={{ display: 'flex', alignItems: 'center' }}>
 				<input
 					type="range"
@@ -108,17 +143,32 @@ const SliderComponent: React.FC<SliderComponentProps> = ({ name, description, mi
 					value={value}
 					onChange={(e) => onChange(parseFloat(e.target.value))}
 				/>
-				<span style={{ marginLeft: '20px', fontWeight: 'bold', color: 'var(--inline-title-color)' }}>{value}</span>
+				<span
+					style={{
+						marginLeft: '20px',
+						fontWeight: 'bold',
+						color: 'var(--inline-title-color)',
+					}}
+				>
+					{value}
+				</span>
 			</div>
 		</div>
 	);
 };
 
-const ToggleComponent: React.FC<ToggleComponentProps> = ({ name, description, value, onChange }) => {
+const ToggleComponent: React.FC<ToggleComponentProps> = ({
+	name,
+	description,
+	value,
+	onChange,
+}) => {
 	return (
 		<div className="copilot-setting-item">
 			<div className="copilot-setting-item-name">{name}</div>
-			<div className="copilot-setting-item-description">{description}</div>
+			<div className="copilot-setting-item-description">
+				{description}
+			</div>
 			<label className="switch">
 				<input
 					type="checkbox"
@@ -131,5 +181,10 @@ const ToggleComponent: React.FC<ToggleComponentProps> = ({ name, description, va
 	);
 };
 
-export { DropdownComponent, SliderComponent, TextAreaComponent, TextComponent, ToggleComponent };
-
+export {
+	DropdownComponent,
+	SliderComponent,
+	TextAreaComponent,
+	TextComponent,
+	ToggleComponent,
+};

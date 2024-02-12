@@ -21,7 +21,10 @@ export default class CopilotView extends ItemView {
 	private defaultSaveFolder: string;
 	private debug = false;
 
-	constructor(leaf: WorkspaceLeaf, private plugin: CopilotPlugin) {
+	constructor(
+		leaf: WorkspaceLeaf,
+		private plugin: CopilotPlugin
+	) {
 		super(leaf);
 		this.sharedState = plugin.sharedState;
 		this.settings = plugin.settings;

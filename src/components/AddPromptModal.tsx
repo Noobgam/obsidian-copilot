@@ -6,29 +6,28 @@ export class AddPromptModal extends Modal {
 		onSave: (title: string, prompt: string) => void,
 		initialTitle = '',
 		initialPrompt = '',
-		disabledTitle?: boolean,
+		disabledTitle?: boolean
 	) {
 		super(app);
 
 		this.contentEl.createEl('h2', { text: 'User Custom Prompt' });
 
-		const formContainer = this.contentEl.createEl('div', { cls: 'copilot-command-modal' });
+		const formContainer = this.contentEl.createEl('div', {
+			cls: 'copilot-command-modal',
+		});
 
-		const titleContainer = formContainer.createEl(
-			'div',
-			{ cls: 'copilot-command-input-container' }
-		);
+		const titleContainer = formContainer.createEl('div', {
+			cls: 'copilot-command-input-container',
+		});
 
-		titleContainer.createEl(
-			'h3', { text: 'Title', cls: 'copilot-command-header' }
-		);
-		titleContainer.createEl(
-			'p',
-			{
-				text: 'The title of the prompt, must be unique.',
-				cls: 'copilot-command-input-description',
-			}
-		);
+		titleContainer.createEl('h3', {
+			text: 'Title',
+			cls: 'copilot-command-header',
+		});
+		titleContainer.createEl('p', {
+			text: 'The title of the prompt, must be unique.',
+			cls: 'copilot-command-input-description',
+		});
 
 		const titleField = titleContainer.createEl('input', { type: 'text' });
 		if (disabledTitle) {
@@ -38,33 +37,32 @@ export class AddPromptModal extends Modal {
 			titleField.value = initialTitle;
 		}
 
-		const promptContainer = formContainer.createEl(
-			'div',
-			{ cls: 'copilot-command-input-container' }
-		);
+		const promptContainer = formContainer.createEl('div', {
+			cls: 'copilot-command-input-container',
+		});
 
-		promptContainer.createEl(
-			'h3', { text: 'Prompt', cls: 'copilot-command-header' }
-		);
+		promptContainer.createEl('h3', {
+			text: 'Prompt',
+			cls: 'copilot-command-header',
+		});
 
 		const promptDescFragment = createFragment((frag) => {
-			frag.createEl(
-				'strong',
-				{ text: '- {} represents the selected text (not required). ' }
+			frag.createEl('strong', {
+				text: '- {} represents the selected text (not required). ',
+			});
+			frag.createEl('br');
+			frag.createEl('strong', {
+				text: '- {[[Note Title]]} represents a note. ',
+			});
+			frag.createEl('br');
+			frag.createEl('strong', {
+				text: '- {FolderPath} represents a folder of notes. ',
+			});
+			frag.createEl('br');
+			frag.createEl('br');
+			frag.appendText(
+				'Tip: turn on debug mode to show the processed prompt in the chat window.'
 			);
-			frag.createEl('br');
-			frag.createEl(
-				'strong',
-				{ text: '- {[[Note Title]]} represents a note. ' }
-			);
-			frag.createEl('br');
-			frag.createEl(
-				'strong',
-				{ text: '- {FolderPath} represents a folder of notes. ' }
-			);
-			frag.createEl('br');
-			frag.createEl('br');
-			frag.appendText('Tip: turn on debug mode to show the processed prompt in the chat window.');
 			frag.createEl('br');
 			frag.createEl('br');
 		});
@@ -76,11 +74,12 @@ export class AddPromptModal extends Modal {
 		}
 
 		const descFragment = createFragment((frag) => {
-			frag.appendText('Save the prompt to the local prompt library. You can then use it with the Copilot command: ');
-			frag.createEl(
-				'strong',
-				{ text: 'Apply custom prompt to selection.' }
+			frag.appendText(
+				'Save the prompt to the local prompt library. You can then use it with the Copilot command: '
 			);
+			frag.createEl('strong', {
+				text: 'Apply custom prompt to selection.',
+			});
 			frag.createEl('br');
 			frag.appendText('Check out the ');
 			frag.createEl('a', {
@@ -96,14 +95,13 @@ export class AddPromptModal extends Modal {
 
 		descContainer.appendChild(descFragment);
 
-		const saveButtonContainer = formContainer.createEl(
-			'div',
-			{ cls: 'copilot-command-save-btn-container' }
-		);
-		const saveButton = saveButtonContainer.createEl(
-			'button',
-			{ text: 'Save', cls: 'copilot-command-save-btn' }
-		);
+		const saveButtonContainer = formContainer.createEl('div', {
+			cls: 'copilot-command-save-btn-container',
+		});
+		const saveButton = saveButtonContainer.createEl('button', {
+			text: 'Save',
+			cls: 'copilot-command-save-btn',
+		});
 		saveButton.addEventListener('click', () => {
 			if (titleField.value && promptField.value) {
 				onSave(titleField.value, promptField.value);

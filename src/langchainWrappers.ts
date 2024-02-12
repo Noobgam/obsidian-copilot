@@ -4,9 +4,7 @@ import OpenAI from 'openai';
 
 // Migrated to OpenAI v4 client from v3: https://github.com/openai/openai-node/discussions/217
 export class ProxyChatOpenAI extends ChatOpenAI {
-	constructor(
-		fields?: any,
-	) {
+	constructor(fields?: any) {
 		super(fields ?? {});
 
 		// Reinitialize the client with the updated clientConfig
@@ -18,9 +16,7 @@ export class ProxyChatOpenAI extends ChatOpenAI {
 }
 
 export class ProxyOpenAIEmbeddings extends OpenAIEmbeddings {
-	constructor(
-		fields?: any,
-	) {
+	constructor(fields?: any) {
 		super(fields ?? {});
 
 		// Reinitialize the client with the updated clientConfig

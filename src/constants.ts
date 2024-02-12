@@ -54,21 +54,15 @@ export const AZURE_MODELS = new Set([
 	ChatModelDisplayNames.AZURE_GPT_4_32K,
 ]);
 
-export const GOOGLE_MODELS = new Set([
-	ChatModelDisplayNames.GEMINI_PRO,
-]);
+export const GOOGLE_MODELS = new Set([ChatModelDisplayNames.GEMINI_PRO]);
 
 export const OPENROUTERAI_MODELS = new Set([
 	ChatModelDisplayNames.OPENROUTERAI,
 ]);
 
-export const OLLAMA_MODELS = new Set([
-	ChatModelDisplayNames.OLLAMA,
-]);
+export const OLLAMA_MODELS = new Set([ChatModelDisplayNames.OLLAMA]);
 
-export const LM_STUDIO_MODELS = new Set([
-	ChatModelDisplayNames.LM_STUDIO,
-]);
+export const LM_STUDIO_MODELS = new Set([ChatModelDisplayNames.LM_STUDIO]);
 
 export const DISPLAY_NAME_TO_MODEL: Record<string, string> = {
 	[ChatModelDisplayNames.GPT_35_TURBO]: ChatModels.GPT_35_TURBO,
@@ -77,7 +71,8 @@ export const DISPLAY_NAME_TO_MODEL: Record<string, string> = {
 	[ChatModelDisplayNames.GPT_4_TURBO]: ChatModels.GPT_4_TURBO,
 	[ChatModelDisplayNames.GPT_4_32K]: ChatModels.GPT_4_32K,
 	[ChatModelDisplayNames.AZURE_GPT_35_TURBO]: ChatModels.AZURE_GPT_35_TURBO,
-	[ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K]: ChatModels.AZURE_GPT_35_TURBO_16K,
+	[ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K]:
+		ChatModels.AZURE_GPT_35_TURBO_16K,
 	[ChatModelDisplayNames.AZURE_GPT_4]: ChatModels.GPT_4,
 	[ChatModelDisplayNames.AZURE_GPT_4_32K]: ChatModels.GPT_4_32K,
 	[ChatModelDisplayNames.GEMINI_PRO]: ChatModels.GEMINI_PRO,
@@ -116,7 +111,8 @@ export const EMBEDDING_PROVIDERS = [
 export const ADA_V2 = 'text-embedding-ada-002';
 export const OPENAI_EMBEDDING_SMALL = 'text-embedding-3-small';
 export const OPENAI_EMBEDDING_LARGE = 'text-embedding-3-large';
-export const DISTILBERT_NLI = 'sentence-transformers/distilbert-base-nli-mean-tokens';
+export const DISTILBERT_NLI =
+	'sentence-transformers/distilbert-base-nli-mean-tokens';
 export const INSTRUCTOR_XL = 'hkunlp/instructor-xl'; // Inference API is off for this
 export const MPNET_V2 = 'sentence-transformers/all-mpnet-base-v2'; // Inference API returns 400
 

@@ -8,7 +8,11 @@ import CopilotView from '@/components/CopilotView';
 import { LanguageModal } from '@/components/LanguageModal';
 import { ListPromptModal } from '@/components/ListPromptModal';
 import { ToneModal } from '@/components/ToneModal';
-import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, } from '@/constants';
+import {
+	CHAT_VIEWTYPE,
+	DEFAULT_SETTINGS,
+	DEFAULT_SYSTEM_PROMPT,
+} from '@/constants';
 import { CustomPrompt } from '@/customPromptProcessor';
 import { CopilotSettings, CopilotSettingTab } from '@/settings/SettingsPage';
 import SharedState from '@/sharedState';
@@ -42,7 +46,9 @@ export default class CopilotPlugin extends Plugin {
 
 		this.dbPrompts = new PouchDB<CustomPrompt>('copilot_custom_prompts');
 
-		this.dbVectorStores = new PouchDB<VectorStoreDocument>('copilot_vector_stores');
+		this.dbVectorStores = new PouchDB<VectorStoreDocument>(
+			'copilot_vector_stores'
+		);
 
 		VectorDBManager.initializeDB(this.dbVectorStores);
 		// Remove documents older than TTL days on load
@@ -60,7 +66,7 @@ export default class CopilotPlugin extends Plugin {
 			name: 'Toggle Copilot Chat Window',
 			callback: () => {
 				this.toggleView();
-			}
+			},
 		});
 
 		this.addCommand({
@@ -68,12 +74,16 @@ export default class CopilotPlugin extends Plugin {
 			name: 'Toggle Copilot Chat Window in Note Area',
 			callback: () => {
 				this.toggleViewNoteArea();
-			}
+			},
 		});
 
-		this.addRibbonIcon('message-square', 'Copilot Chat', (evt: MouseEvent) => {
-			this.toggleView();
-		});
+		this.addRibbonIcon(
+			'message-square',
+			'Copilot Chat',
+			(evt: MouseEvent) => {
+				this.toggleView();
+			}
+		);
 
 		this.addCommand({
 			id: 'fix-grammar-prompt',
@@ -165,7 +175,7 @@ export default class CopilotPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'eli5-prompt',
-			name: 'Explain selection like I\'m 5',
+			name: "Explain selection like I'm 5",
 			editorCallback: (editor: Editor) => {
 				this.processSelection(editor, 'eli5Selection');
 			},
@@ -188,7 +198,11 @@ export default class CopilotPlugin extends Plugin {
 						new Notice('Please select a language.');
 						return;
 					}
-					this.processSelection(editor, 'translateSelection', language);
+					this.processSelection(
+						editor,
+						'translateSelection',
+						language
+					);
 				}).open();
 			},
 		});
@@ -219,16 +233,24 @@ export default class CopilotPlugin extends Plugin {
 			id: 'add-custom-prompt',
 			name: 'Add custom prompt',
 			editorCallback: (editor: Editor) => {
-				new AddPromptModal(this.app, async (title: string, prompt: string) => {
-					try {
-						// Save the prompt to the database
-						await this.dbPrompts.put({ _id: title, prompt: prompt });
-						new Notice('Custom prompt saved successfully.');
-					} catch (e) {
-						new Notice('Error saving custom prompt. Please check if the title already exists.');
-						console.error(e);
+				new AddPromptModal(
+					this.app,
+					async (title: string, prompt: string) => {
+						try {
+							// Save the prompt to the database
+							await this.dbPrompts.put({
+								_id: title,
+								prompt: prompt,
+							});
+							new Notice('Custom prompt saved successfully.');
+						} catch (e) {
+							new Notice(
+								'Error saving custom prompt. Please check if the title already exists.'
+							);
+							console.error(e);
+						}
 					}
-				}).open();
+				).open();
 			},
 		});
 
@@ -237,27 +259,41 @@ export default class CopilotPlugin extends Plugin {
 			name: 'Apply custom prompt',
 			editorCallback: (editor: Editor) => {
 				this.fetchPromptTitles().then((promptTitles: string[]) => {
-					new ListPromptModal(this.app, promptTitles, async (promptTitle: string) => {
-						if (!promptTitle) {
-							new Notice('Please select a prompt title.');
-							return;
-						}
-						try {
-							const doc = await this.dbPrompts.get(promptTitle) as CustomPrompt;
-							if (!doc.prompt) {
-								new Notice(`No prompt found with the title "${promptTitle}".`);
+					new ListPromptModal(
+						this.app,
+						promptTitles,
+						async (promptTitle: string) => {
+							if (!promptTitle) {
+								new Notice('Please select a prompt title.');
 								return;
 							}
-							this.processCustomPrompt(editor, 'applyCustomPrompt', doc.prompt);
-						} catch (err) {
-							if (err.name === 'not_found') {
-								new Notice(`No prompt found with the title "${promptTitle}".`);
-							} else {
-								console.error(err);
-								new Notice('An error occurred.');
+							try {
+								const doc = (await this.dbPrompts.get(
+									promptTitle
+								)) as CustomPrompt;
+								if (!doc.prompt) {
+									new Notice(
+										`No prompt found with the title "${promptTitle}".`
+									);
+									return;
+								}
+								this.processCustomPrompt(
+									editor,
+									'applyCustomPrompt',
+									doc.prompt
+								);
+							} catch (err) {
+								if (err.name === 'not_found') {
+									new Notice(
+										`No prompt found with the title "${promptTitle}".`
+									);
+								} else {
+									console.error(err);
+									new Notice('An error occurred.');
+								}
 							}
 						}
-					}).open();
+					).open();
 				});
 			},
 		});
@@ -266,14 +302,21 @@ export default class CopilotPlugin extends Plugin {
 			id: 'apply-adhoc-prompt',
 			name: 'Apply ad-hoc custom prompt',
 			editorCallback: async (editor: Editor) => {
-				const modal = new AdhocPromptModal(this.app, async (adhocPrompt: string) => {
-					try {
-						this.processCustomPrompt(editor, 'applyAdhocPrompt', adhocPrompt);
-					} catch (err) {
-						console.error(err);
-						new Notice('An error occurred.');
+				const modal = new AdhocPromptModal(
+					this.app,
+					async (adhocPrompt: string) => {
+						try {
+							this.processCustomPrompt(
+								editor,
+								'applyAdhocPrompt',
+								adhocPrompt
+							);
+						} catch (err) {
+							console.error(err);
+							new Notice('An error occurred.');
+						}
 					}
-				});
+				);
 
 				modal.open();
 			},
@@ -288,29 +331,44 @@ export default class CopilotPlugin extends Plugin {
 				}
 
 				this.fetchPromptTitles().then((promptTitles: string[]) => {
-					new ListPromptModal(this.app, promptTitles, async (promptTitle: string) => {
-						if (!promptTitle) {
-							new Notice('Please select a prompt title.');
-							return;
-						}
+					new ListPromptModal(
+						this.app,
+						promptTitles,
+						async (promptTitle: string) => {
+							if (!promptTitle) {
+								new Notice('Please select a prompt title.');
+								return;
+							}
 
-						try {
-							const doc = await this.dbPrompts.get(promptTitle);
-							if (doc._rev) {
-								await this.dbPrompts.remove(doc as PouchDB.Core.RemoveDocument);
-								new Notice(`Prompt "${promptTitle}" has been deleted.`);
-							} else {
-								new Notice(`Failed to delete prompt "${promptTitle}": No revision found.`);
-							}
-						} catch (err) {
-							if (err.name === 'not_found') {
-								new Notice(`No prompt found with the title "${promptTitle}".`);
-							} else {
-								console.error(err);
-								new Notice('An error occurred while deleting the prompt.');
+							try {
+								const doc =
+									await this.dbPrompts.get(promptTitle);
+								if (doc._rev) {
+									await this.dbPrompts.remove(
+										doc as PouchDB.Core.RemoveDocument
+									);
+									new Notice(
+										`Prompt "${promptTitle}" has been deleted.`
+									);
+								} else {
+									new Notice(
+										`Failed to delete prompt "${promptTitle}": No revision found.`
+									);
+								}
+							} catch (err) {
+								if (err.name === 'not_found') {
+									new Notice(
+										`No prompt found with the title "${promptTitle}".`
+									);
+								} else {
+									console.error(err);
+									new Notice(
+										'An error occurred while deleting the prompt.'
+									);
+								}
 							}
 						}
-					}).open();
+					).open();
 				});
 
 				return true;
@@ -326,34 +384,52 @@ export default class CopilotPlugin extends Plugin {
 				}
 
 				this.fetchPromptTitles().then((promptTitles: string[]) => {
-					new ListPromptModal(this.app, promptTitles, async (promptTitle: string) => {
-						if (!promptTitle) {
-							new Notice('Please select a prompt title.');
-							return;
-						}
+					new ListPromptModal(
+						this.app,
+						promptTitles,
+						async (promptTitle: string) => {
+							if (!promptTitle) {
+								new Notice('Please select a prompt title.');
+								return;
+							}
 
-						try {
-							const doc = await this.dbPrompts.get(promptTitle) as CustomPrompt;
-							if (doc.prompt) {
-								new AddPromptModal(this.app, (title: string, newPrompt: string) => {
-									this.dbPrompts.put({
-										...doc,
-										prompt: newPrompt,
-									});
-									new Notice(`Prompt "${title}" has been updated.`);
-								}, doc._id, doc.prompt, true).open();
-							} else {
-								new Notice(`No prompt found with the title "${promptTitle}".`);
-							}
-						} catch (err) {
-							if (err.name === 'not_found') {
-								new Notice(`No prompt found with the title "${promptTitle}".`);
-							} else {
-								console.error(err);
-								new Notice('An error occurred.');
+							try {
+								const doc = (await this.dbPrompts.get(
+									promptTitle
+								)) as CustomPrompt;
+								if (doc.prompt) {
+									new AddPromptModal(
+										this.app,
+										(title: string, newPrompt: string) => {
+											this.dbPrompts.put({
+												...doc,
+												prompt: newPrompt,
+											});
+											new Notice(
+												`Prompt "${title}" has been updated.`
+											);
+										},
+										doc._id,
+										doc.prompt,
+										true
+									).open();
+								} else {
+									new Notice(
+										`No prompt found with the title "${promptTitle}".`
+									);
+								}
+							} catch (err) {
+								if (err.name === 'not_found') {
+									new Notice(
+										`No prompt found with the title "${promptTitle}".`
+									);
+								} else {
+									console.error(err);
+									new Notice('An error occurred.');
+								}
 							}
 						}
-					}).open();
+					).open();
 				});
 
 				return true;
@@ -368,36 +444,54 @@ export default class CopilotPlugin extends Plugin {
 					// Clear the vectorstore db
 					await this.dbVectorStores.destroy();
 					// Reinitialize the database
-					this.dbVectorStores = new PouchDB<VectorStoreDocument>('copilot_vector_stores');
+					this.dbVectorStores = new PouchDB<VectorStoreDocument>(
+						'copilot_vector_stores'
+					);
 					// Make sure to update the instance with VectorDBManager
 					VectorDBManager.updateDBInstance(this.dbVectorStores);
 					new Notice('Local vector store cleared successfully.');
-					console.log('Local vector store cleared successfully, new instance created.');
+					console.log(
+						'Local vector store cleared successfully, new instance created.'
+					);
 				} catch (err) {
-					console.error('Error clearing the local vector store:', err);
-					new Notice('An error occurred while clearing the local vector store.');
+					console.error(
+						'Error clearing the local vector store:',
+						err
+					);
+					new Notice(
+						'An error occurred while clearing the local vector store.'
+					);
 				}
-			}
+			},
 		});
 
 		this.addCommand({
 			id: 'set-chat-note-context',
 			name: 'Set note context for Chat mode',
 			callback: async () => {
-				new ChatNoteContextModal(this.app, this.settings, async (path: string) => {
-					// Store the path in the plugin's settings, default to empty string
-					this.settings.chatNoteContextPath = path;
-					await this.saveSettings();
-				}).open();
+				new ChatNoteContextModal(
+					this.app,
+					this.settings,
+					async (path: string) => {
+						// Store the path in the plugin's settings, default to empty string
+						this.settings.chatNoteContextPath = path;
+						await this.saveSettings();
+					}
+				).open();
 			},
 		});
 	}
 
-	async processText(editor: Editor, eventType: string, eventSubtype?: string, checkSelectedText = true) {
+	async processText(
+		editor: Editor,
+		eventType: string,
+		eventSubtype?: string,
+		checkSelectedText = true
+	) {
 		const selectedText = editor.getSelection();
 
-		const isChatWindowActive = this.app.workspace
-			.getLeavesOfType(CHAT_VIEWTYPE).length > 0;
+		const isChatWindowActive =
+			this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE).length > 0;
 
 		if (!isChatWindowActive) {
 			await this.activateView();
@@ -407,9 +501,14 @@ export default class CopilotPlugin extends Plugin {
 		setTimeout(() => {
 			const activeCopilotView = this.app.workspace
 				.getLeavesOfType(CHAT_VIEWTYPE)
-				.find((leaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
+				.find((leaf) => leaf.view instanceof CopilotView)
+				?.view as CopilotView;
 			if (activeCopilotView && (!checkSelectedText || selectedText)) {
-				activeCopilotView.emitter.emit(eventType, selectedText, eventSubtype);
+				activeCopilotView.emitter.emit(
+					eventType,
+					selectedText,
+					eventSubtype
+				);
 			}
 		}, 0);
 	}
@@ -418,7 +517,11 @@ export default class CopilotPlugin extends Plugin {
 		this.processText(editor, eventType, eventSubtype);
 	}
 
-	processCustomPrompt(editor: Editor, eventType: string, customPrompt: string) {
+	processCustomPrompt(
+		editor: Editor,
+		eventType: string,
+		customPrompt: string
+	) {
 		this.processText(editor, eventType, customPrompt, false);
 	}
 
@@ -429,12 +532,16 @@ export default class CopilotPlugin extends Plugin {
 
 	async activateView() {
 		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
-		this.activateViewPromise = this.app.workspace.getRightLeaf(false).setViewState({
-			type: CHAT_VIEWTYPE,
-			active: true,
-		});
+		this.activateViewPromise = this.app.workspace
+			.getRightLeaf(false)
+			.setViewState({
+				type: CHAT_VIEWTYPE,
+				active: true,
+			});
 		await this.activateViewPromise;
-		this.app.workspace.revealLeaf(this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0]);
+		this.app.workspace.revealLeaf(
+			this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0]
+		);
 		this.chatIsVisible = true;
 	}
 
@@ -450,17 +557,25 @@ export default class CopilotPlugin extends Plugin {
 
 	async activateViewNoteArea() {
 		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
-		this.activateViewPromise = this.app.workspace.getLeaf(true).setViewState({
-			type: CHAT_VIEWTYPE,
-			active: true,
-		});
+		this.activateViewPromise = this.app.workspace
+			.getLeaf(true)
+			.setViewState({
+				type: CHAT_VIEWTYPE,
+				active: true,
+			});
 		await this.activateViewPromise;
-		this.app.workspace.revealLeaf(this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0]);
+		this.app.workspace.revealLeaf(
+			this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0]
+		);
 		this.chatIsVisible = true;
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
 	}
 
 	async saveSettings(): Promise<void> {
@@ -470,7 +585,7 @@ export default class CopilotPlugin extends Plugin {
 	async fetchPromptTitles(): Promise<string[]> {
 		const response = await this.dbPrompts.allDocs({ include_docs: true });
 		return response.rows
-			.map(row => (row.doc as CustomPrompt)?._id)
+			.map((row) => (row.doc as CustomPrompt)?._id)
 			.filter(Boolean) as string[];
 	}
 
@@ -509,19 +624,22 @@ export default class CopilotPlugin extends Plugin {
 			azureOpenAIApiEmbeddingDeploymentName,
 			googleApiKey,
 			openRouterAiApiKey,
-			openRouterModel: openRouterModel || DEFAULT_SETTINGS.openRouterModel,
+			openRouterModel:
+				openRouterModel || DEFAULT_SETTINGS.openRouterModel,
 			ollamaModel: ollamaModel || DEFAULT_SETTINGS.ollamaModel,
 			ollamaBaseUrl: ollamaBaseUrl || DEFAULT_SETTINGS.ollamaBaseUrl,
-			lmStudioBaseUrl: lmStudioBaseUrl || DEFAULT_SETTINGS.lmStudioBaseUrl,
+			lmStudioBaseUrl:
+				lmStudioBaseUrl || DEFAULT_SETTINGS.lmStudioBaseUrl,
 			model: this.settings.defaultModel,
 			modelDisplayName: this.settings.defaultModelDisplayName,
 			embeddingModel: embeddingModel || DEFAULT_SETTINGS.embeddingModel,
 			temperature: Number(temperature),
 			maxTokens: Number(maxTokens),
-			systemMessage: this.settings.userSystemPrompt || DEFAULT_SYSTEM_PROMPT,
+			systemMessage:
+				this.settings.userSystemPrompt || DEFAULT_SYSTEM_PROMPT,
 			chatContextTurns: Number(contextTurns),
 			embeddingProvider: embeddingProvider,
-			chainType: ChainType.LLM_CHAIN,  // Set LLM_CHAIN as default ChainType
+			chainType: ChainType.LLM_CHAIN, // Set LLM_CHAIN as default ChainType
 			options: { forceNewCreation: true } as SetChainOptions,
 			openAIProxyBaseUrl: this.settings.openAIProxyBaseUrl,
 		};

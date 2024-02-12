@@ -5,15 +5,11 @@ export default class MemoryManager {
 	private static instance: MemoryManager;
 	private memory: BaseChatMemory;
 
-	private constructor(
-		private langChainParams: LangChainParams
-	) {
+	private constructor(private langChainParams: LangChainParams) {
 		this.initMemory();
 	}
 
-	static getInstance(
-		langChainParams: LangChainParams
-	): MemoryManager {
+	static getInstance(langChainParams: LangChainParams): MemoryManager {
 		if (!MemoryManager.instance) {
 			MemoryManager.instance = new MemoryManager(langChainParams);
 		}
@@ -37,5 +33,4 @@ export default class MemoryManager {
 			returnMessages: true,
 		});
 	}
-
 }

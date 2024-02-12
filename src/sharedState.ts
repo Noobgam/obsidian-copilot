@@ -25,11 +25,7 @@ class SharedState {
 
 export function useSharedState(
 	sharedState: SharedState
-): [
-	ChatMessage[],
-	(message: ChatMessage) => void,
-	() => void
-] {
+): [ChatMessage[], (message: ChatMessage) => void, () => void] {
 	// Initializes the local chatHistory state with the current
 	// sharedState chatHistory using the useState hook
 	// setChatHistory is used to update the *local* state
@@ -49,7 +45,7 @@ export function useSharedState(
 
 	const addMessage = (message: ChatMessage) => {
 		sharedState.addMessage(message);
-		console.log(`Adding message: ${JSON.stringify(message)}`)
+		console.log(`Adding message: ${JSON.stringify(message)}`);
 		setChatHistory([...sharedState.getMessages()]);
 	};
 
@@ -58,11 +54,7 @@ export function useSharedState(
 		setChatHistory([]);
 	};
 
-	return [
-		chatHistory,
-		addMessage,
-		clearMessages,
-	];
+	return [chatHistory, addMessage, clearMessages];
 }
 
 export default SharedState;

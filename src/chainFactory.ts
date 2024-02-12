@@ -1,6 +1,9 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { BaseRetriever } from '@langchain/core/retrievers';
-import { RunnablePassthrough, RunnableSequence, } from '@langchain/core/runnables';
+import {
+	RunnablePassthrough,
+	RunnableSequence,
+} from '@langchain/core/runnables';
 import { BaseLanguageModel } from 'langchain/base_language';
 import { BaseChatMemory } from 'langchain/memory';
 import { ChatPromptTemplate, PromptTemplate } from 'langchain/prompts';
@@ -141,14 +144,16 @@ class ChainFactory {
 
 		const formatChatHistory = (chatHistory: [string, string][]) => {
 			const formattedDialogueTurns = chatHistory.map(
-				(dialogueTurn) => `Human: ${dialogueTurn[0]}\nAssistant: ${dialogueTurn[1]}`
+				(dialogueTurn) =>
+					`Human: ${dialogueTurn[0]}\nAssistant: ${dialogueTurn[1]}`
 			);
 			return formattedDialogueTurns.join('\n');
 		};
 
 		const standaloneQuestionChain = RunnableSequence.from([
 			{
-				question: (input: ConversationalRetrievalQAChainInput) => input.question,
+				question: (input: ConversationalRetrievalQAChainInput) =>
+					input.question,
 				chat_history: (input: ConversationalRetrievalQAChainInput) =>
 					formatChatHistory(input.chat_history),
 			},
@@ -166,7 +171,8 @@ class ChainFactory {
 			llm,
 		]);
 
-		const conversationalRetrievalQAChain = standaloneQuestionChain.pipe(answerChain);
+		const conversationalRetrievalQAChain =
+			standaloneQuestionChain.pipe(answerChain);
 		console.log('New Conversational Retrieval QA Chain created.');
 
 		return conversationalRetrievalQAChain as RunnableSequence;

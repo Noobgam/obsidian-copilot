@@ -10,15 +10,11 @@ export default class PromptManager {
 	private static instance: PromptManager;
 	private chatPrompt: ChatPromptTemplate;
 
-	private constructor(
-		private langChainParams: LangChainParams
-	) {
+	private constructor(private langChainParams: LangChainParams) {
 		this.initChatPrompt();
 	}
 
-	static getInstance(
-		langChainParams: LangChainParams
-	): PromptManager {
+	static getInstance(langChainParams: LangChainParams): PromptManager {
 		if (!PromptManager.instance) {
 			PromptManager.instance = new PromptManager(langChainParams);
 		}

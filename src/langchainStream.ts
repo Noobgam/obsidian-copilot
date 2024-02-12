@@ -11,10 +11,10 @@ export const getAIResponse = async (
 	updateCurrentAiMessage: (message: string) => void,
 	updateShouldAbort: (abortController: AbortController | null) => void,
 	options: {
-		debug?: boolean,
-		ignoreSystemMessage?: boolean,
-		updateLoading?: (loading: boolean) => void
-	} = {},
+		debug?: boolean;
+		ignoreSystemMessage?: boolean;
+		updateLoading?: (loading: boolean) => void;
+	} = {}
 ) => {
 	const abortController = new AbortController();
 	updateShouldAbort(abortController);
@@ -24,7 +24,7 @@ export const getAIResponse = async (
 			abortController,
 			updateCurrentAiMessage,
 			addMessage,
-			options,
+			options
 		);
 	} catch (error) {
 		console.error('Model request failed:', error);

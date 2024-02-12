@@ -71,11 +71,11 @@ export const CodeBlock: FC<CodeProps> = memo(({ language = 'text', value }) => {
 		const fileExtension = programmingLanguages[language] || '.file';
 		const suggestedFileName = `file-${generateRandomString(
 			3,
-			true,
+			true
 		)}${fileExtension}`;
 		const fileName = window.prompt(
 			t('Enter file name') || '',
-			suggestedFileName,
+			suggestedFileName
 		);
 
 		if (!fileName) {
@@ -105,9 +105,9 @@ export const CodeBlock: FC<CodeProps> = memo(({ language = 'text', value }) => {
 						onClick={copyToClipboard}
 					>
 						{isCopied ? (
-							<IconCheck size={18}/>
+							<IconCheck size={18} />
 						) : (
-							<IconClipboard size={18}/>
+							<IconClipboard size={18} />
 						)}
 						{isCopied ? t('Copied!') : t('Copy code')}
 					</button>
@@ -115,7 +115,7 @@ export const CodeBlock: FC<CodeProps> = memo(({ language = 'text', value }) => {
 						className="flex items-center rounded bg-none p-1 text-xs text-white"
 						onClick={downloadAsFile}
 					>
-						<IconDownload size={18}/>
+						<IconDownload size={18} />
 					</button>
 				</div>
 			</div>

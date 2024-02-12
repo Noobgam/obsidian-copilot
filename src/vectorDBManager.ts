@@ -32,20 +32,22 @@ class VectorDBManager {
 	}
 
 	public static async rebuildMemoryVectorStore(
-		memoryVectors: MemoryVector[], embeddingsAPI: Embeddings
+		memoryVectors: MemoryVector[],
+		embeddingsAPI: Embeddings
 	) {
 		if (!Array.isArray(memoryVectors)) {
 			throw new TypeError('Expected memoryVectors to be an array');
 		}
 		// Extract the embeddings and documents from the deserialized memoryVectors
 		const embeddingsArray: number[][] = memoryVectors.map(
-			memoryVector => memoryVector.embedding
+			(memoryVector) => memoryVector.embedding
 		);
 		const documentsArray = memoryVectors.map(
-			memoryVector => new Document({
-				pageContent: memoryVector.content,
-				metadata: memoryVector.metadata
-			})
+			(memoryVector) =>
+				new Document({
+					pageContent: memoryVector.content,
+					metadata: memoryVector.metadata,
+				})
 		);
 
 		// Create a new MemoryVectorStore instance
@@ -54,7 +56,10 @@ class VectorDBManager {
 		return memoryVectorStore;
 	}
 
-	public static async setMemoryVectors(memoryVectors: MemoryVector[], docHash: string): Promise<void> {
+	public static async setMemoryVectors(
+		memoryVectors: MemoryVector[],
+		docHash: string
+	): Promise<void> {
 		if (!this.db) throw new Error('DB not initialized');
 		if (!Array.isArray(memoryVectors)) {
 			throw new TypeError('Expected memoryVectors to be an array');
@@ -62,14 +67,14 @@ class VectorDBManager {
 		const serializedMemoryVectors = JSON.stringify(memoryVectors);
 		try {
 			// Attempt to fetch the existing document, if it exists.
-			const existingDoc = await this.db.get(docHash).catch(err => null);
+			const existingDoc = await this.db.get(docHash).catch((err) => null);
 
 			// Prepare the document to be saved.
 			const docToSave = {
 				_id: docHash,
 				memory_vectors: serializedMemoryVectors,
 				created_at: Date.now(),
-				_rev: existingDoc?._rev // Add the current revision if the document exists.
+				_rev: existingDoc?._rev, // Add the current revision if the document exists.
 			};
 
 			// Save the document.
@@ -79,7 +84,9 @@ class VectorDBManager {
 		}
 	}
 
-	public static async getMemoryVectors(docHash: string): Promise<MemoryVector[] | undefined> {
+	public static async getMemoryVectors(
+		docHash: string
+	): Promise<MemoryVector[] | undefined> {
 		if (!this.db) throw new Error('DB not initialized');
 		try {
 			const doc: VectorStoreDocument = await this.db.get(docHash);
@@ -98,10 +105,12 @@ class VectorDBManager {
 			const thresholdTime = Date.now() - ttl;
 
 			// Fetch all documents from the database
-			const allDocsResponse = await this.db.allDocs<{ created_at: number }>({ include_docs: true });
+			const allDocsResponse = await this.db.allDocs<{
+				created_at: number;
+			}>({ include_docs: true });
 
 			// Filter out the documents older than 2 weeks
-			const oldDocs = allDocsResponse.rows.filter(row => {
+			const oldDocs = allDocsResponse.rows.filter((row) => {
 				// Assert the doc type
 				const doc = row.doc as VectorStoreDocument;
 				return doc && doc.created_at < thresholdTime;
@@ -111,10 +120,10 @@ class VectorDBManager {
 				return;
 			}
 			// Prepare the documents for deletion
-			const docsToDelete = oldDocs.map(row => ({
+			const docsToDelete = oldDocs.map((row) => ({
 				_id: row.id,
 				_rev: (row.doc as VectorStoreDocument)._rev,
-				_deleted: true
+				_deleted: true,
 			}));
 
 			// Delete the old documents

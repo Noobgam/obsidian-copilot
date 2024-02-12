@@ -26,5 +26,3 @@ export class ListPromptModal extends FuzzySuggestModal<string> {
 		this.onChoosePromptTitle(promptTitle);
 	}
 }
-
-

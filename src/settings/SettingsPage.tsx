@@ -57,7 +57,7 @@ export class CopilotSettingTab extends PluginSettingTab {
 
 			// Reload the plugin
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const app = (this.plugin.app as any);
+			const app = this.plugin.app as any;
 			await app.plugins.disablePlugin('copilot');
 			await app.plugins.enablePlugin('copilot');
 
@@ -77,25 +77,33 @@ export class CopilotSettingTab extends PluginSettingTab {
 		const sections = createRoot(div);
 
 		sections.render(
-			<SettingsMain plugin={this.plugin} reloadPlugin={this.reloadPlugin.bind(this)}/>
+			<SettingsMain
+				plugin={this.plugin}
+				reloadPlugin={this.reloadPlugin.bind(this)}
+			/>
 		);
 
-		const devModeHeader = containerEl.createEl('h1', { text: 'Development mode' });
+		const devModeHeader = containerEl.createEl('h1', {
+			text: 'Development mode',
+		});
 		devModeHeader.style.marginTop = '40px';
 
 		new Setting(containerEl)
 			.setName('Debug mode')
 			.setDesc(
 				createFragment((frag) => {
-					frag.appendText('Debug mode will log all API requests and prompts to the console.');
+					frag.appendText(
+						'Debug mode will log all API requests and prompts to the console.'
+					);
 				})
 			)
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.debug)
-				.onChange(async (value) => {
-					this.plugin.settings.debug = value;
-					await this.plugin.saveSettings();
-				})
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.debug)
+					.onChange(async (value) => {
+						this.plugin.settings.debug = value;
+						await this.plugin.saveSettings();
+					})
 			);
 	}
 }

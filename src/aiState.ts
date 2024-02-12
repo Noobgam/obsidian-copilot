@@ -8,7 +8,7 @@ import { useState } from 'react';
  * React hook to manage state related to model, chain and memory in Chat component.
  */
 export function useAIState(
-	chainManager: ChainManager,
+	chainManager: ChainManager
 ): [
 	string,
 	(model: string) => void,
@@ -17,9 +17,15 @@ export function useAIState(
 	() => void,
 ] {
 	const { langChainParams } = chainManager;
-	const [currentModel, setCurrentModel] = useState<string>(langChainParams.modelDisplayName);
-	const [currentChain, setCurrentChain] = useState<ChainType>(langChainParams.chainType);
-	const [, setChatMemory] = useState<BaseChatMemory | null>(chainManager.memoryManager.getMemory());
+	const [currentModel, setCurrentModel] = useState<string>(
+		langChainParams.modelDisplayName
+	);
+	const [currentChain, setCurrentChain] = useState<ChainType>(
+		langChainParams.chainType
+	);
+	const [, setChatMemory] = useState<BaseChatMemory | null>(
+		chainManager.memoryManager.getMemory()
+	);
 
 	const clearChatMemory = () => {
 		chainManager.memoryManager.clearChatMemory();
@@ -36,11 +42,5 @@ export function useAIState(
 		setCurrentChain(newChain);
 	};
 
-	return [
-		currentModel,
-		setModel,
-		currentChain,
-		setChain,
-		clearChatMemory,
-	];
+	return [currentModel, setModel, currentChain, setChain, clearChatMemory];
 }

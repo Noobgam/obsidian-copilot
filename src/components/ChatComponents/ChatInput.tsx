@@ -9,13 +9,19 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
-	inputMessage, setInputMessage, handleKeyDown, handleSendMessage, getChatVisibility,
+	inputMessage,
+	setInputMessage,
+	handleKeyDown,
+	handleSendMessage,
+	getChatVisibility,
 }) => {
 	const [rows, setRows] = useState(1);
 	const [shouldFocus, setShouldFocus] = useState(false);
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+	const handleInputChange = (
+		event: React.ChangeEvent<HTMLTextAreaElement>
+	) => {
 		setInputMessage(event.target.value);
 		updateRows(event.target.value);
 	};
@@ -26,7 +32,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
 		const minRows = 1;
 
 		const rowsNeeded = Math.min(
-			Math.max(text.split('\n').length, minRows), Math.floor(maxHeight / lineHeight)
+			Math.max(text.split('\n').length, minRows),
+			Math.floor(maxHeight / lineHeight)
 		);
 		setRows(rowsNeeded);
 	};
@@ -49,7 +56,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
 	return (
 		<div className="chat-input-container">
-      <textarea
+			<textarea
 				ref={textAreaRef}
 				className="chat-input-textarea"
 				placeholder="Enter your message here..."
@@ -64,4 +71,3 @@ const ChatInput: React.FC<ChatInputProps> = ({
 };
 
 export default ChatInput;
-

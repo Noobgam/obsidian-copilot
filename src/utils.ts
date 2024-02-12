@@ -1,5 +1,9 @@
 import { ChainType } from '@/chainFactory';
-import { DEFAULT_SETTINGS, DISPLAY_NAME_TO_MODEL, USER_SENDER } from '@/constants';
+import {
+	DEFAULT_SETTINGS,
+	DISPLAY_NAME_TO_MODEL,
+	USER_SENDER,
+} from '@/constants';
 import { CopilotSettings } from '@/settings/SettingsPage';
 import { ChatMessage } from '@/sharedState';
 import { MemoryVariables } from '@langchain/core/memory';
@@ -8,12 +12,20 @@ import { BaseChain, RetrievalQAChain } from 'langchain/chains';
 import moment from 'moment';
 import { TFile, Vault } from 'obsidian';
 
-export const isFolderMatch = (fileFullpath: string, inputPath: string): boolean => {
-	const fileSegments = fileFullpath.split('/').map(segment => segment.toLowerCase());
+export const isFolderMatch = (
+	fileFullpath: string,
+	inputPath: string
+): boolean => {
+	const fileSegments = fileFullpath
+		.split('/')
+		.map((segment) => segment.toLowerCase());
 	return fileSegments.includes(inputPath.toLowerCase());
 };
 
-export const getNotesFromPath = async (vault: Vault, path: string): Promise<TFile[]> => {
+export const getNotesFromPath = async (
+	vault: Vault,
+	path: string
+): Promise<TFile[]> => {
 	const files = await vault.getMarkdownFiles();
 
 	// Special handling for the root path '/'
@@ -25,9 +37,12 @@ export const getNotesFromPath = async (vault: Vault, path: string): Promise<TFil
 	const pathSegments = path.split('/');
 	const lastSegment = pathSegments[pathSegments.length - 1].toLowerCase();
 
-	return files.filter(file => {
+	return files.filter((file) => {
 		// Split the file path and get the last directory name
-		return isFolderMatch(file.path, lastSegment) || file.basename === lastSegment;
+		return (
+			isFolderMatch(file.path, lastSegment) ||
+			file.basename === lastSegment
+		);
 	});
 };
 
@@ -42,17 +57,25 @@ export const stringToChainType = (chain: string): ChainType => {
 	}
 };
 
-export const isLLMChain = (chain: RunnableSequence): chain is RunnableSequence => {
+export const isLLMChain = (
+	chain: RunnableSequence
+): chain is RunnableSequence => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return (chain as any).last.bound.modelName || (chain as any).last.bound.model;
+	return (
+		(chain as any).last.bound.modelName || (chain as any).last.bound.model
+	);
 };
 
-export const isRetrievalQAChain = (chain: BaseChain): chain is RetrievalQAChain => {
+export const isRetrievalQAChain = (
+	chain: BaseChain
+): chain is RetrievalQAChain => {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return (chain as any).last.bound.retriever !== undefined;
 };
 
-export const isSupportedChain = (chain: RunnableSequence): chain is RunnableSequence => {
+export const isSupportedChain = (
+	chain: RunnableSequence
+): chain is RunnableSequence => {
 	return isLLMChain(chain) || isRetrievalQAChain(chain);
 };
 
@@ -62,11 +85,17 @@ export const getModelName = (modelDisplayName: string): string => {
 
 // Returns the last N messages from the chat history,
 // last one being the newest ai message
-export const getChatContext = (chatHistory: ChatMessage[], contextSize: number) => {
+export const getChatContext = (
+	chatHistory: ChatMessage[],
+	contextSize: number
+) => {
 	if (chatHistory.length === 0) {
 		return [];
 	}
-	const lastAiMessageIndex = chatHistory.slice().reverse().findIndex(msg => msg.sender !== USER_SENDER);
+	const lastAiMessageIndex = chatHistory
+		.slice()
+		.reverse()
+		.findIndex((msg) => msg.sender !== USER_SENDER);
 	if (lastAiMessageIndex === -1) {
 		// No ai messages found, return an empty array
 		return [];
@@ -77,7 +106,10 @@ export const getChatContext = (chatHistory: ChatMessage[], contextSize: number) 
 	return chatHistory.slice(startIndex, lastIndex + 1);
 };
 
-export const formatDateTime = (now: Date, timezone: 'local' | 'utc' = 'local') => {
+export const formatDateTime = (
+	now: Date,
+	timezone: 'local' | 'utc' = 'local'
+) => {
 	const formattedDateTime = moment(now);
 
 	if (timezone === 'utc') {
@@ -118,40 +150,56 @@ export function sanitizeSettings(settings: CopilotSettings): CopilotSettings {
 	return sanitizedSettings;
 }
 
-export function fixGrammarSpellingSelectionPrompt(selectedText: string): string {
-	return `Please fix the grammar and spelling of the following text and return it without any other changes:\n\n`
-		+ `${selectedText}`;
+export function fixGrammarSpellingSelectionPrompt(
+	selectedText: string
+): string {
+	return (
+		`Please fix the grammar and spelling of the following text and return it without any other changes:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function summarizePrompt(selectedText: string): string {
-	return `Please summarize the following text into bullet points and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n`
-		+ `${selectedText}`;
+	return (
+		`Please summarize the following text into bullet points and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function tocPrompt(selectedText: string): string {
-	return `Please generate a table of contents for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n`
-		+ `${selectedText}`;
+	return (
+		`Please generate a table of contents for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function glossaryPrompt(selectedText: string): string {
-	return `Please generate a glossary for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n`
-		+ `${selectedText}`;
+	return (
+		`Please generate a glossary for the following text and return it without any other changes. Output in the same language as the source, do not output English if it is not English:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function simplifyPrompt(selectedText: string): string {
-	return `Please simplify the following text so that a 6th-grader can understand. Output in the same language as the source, do not output English if it is not English:\n\n`
-		+ `${selectedText}`;
+	return (
+		`Please simplify the following text so that a 6th-grader can understand. Output in the same language as the source, do not output English if it is not English:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function emojifyPrompt(selectedText: string): string {
-	return `Please insert emojis to the following content without changing the text.`
-		+ `Insert at as many places as possible, but don't have any 2 emojis together. The original text must be returned.\n`
-		+ `Content: ${selectedText}`;
+	return (
+		`Please insert emojis to the following content without changing the text.` +
+		`Insert at as many places as possible, but don't have any 2 emojis together. The original text must be returned.\n` +
+		`Content: ${selectedText}`
+	);
 }
 
 export function removeUrlsFromSelectionPrompt(selectedText: string): string {
-	return `Please remove all URLs from the following text and return it without any other changes:\n\n`
-		+ `${selectedText}`;
+	return (
+		`Please remove all URLs from the following text and return it without any other changes:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function rewriteTweetSelectionPrompt(selectedText: string): string {
@@ -159,49 +207,71 @@ export function rewriteTweetSelectionPrompt(selectedText: string): string {
     + ${selectedText}`;
 }
 
-export function rewriteTweetThreadSelectionPrompt(selectedText: string): string {
-	return `Please follow the instructions closely step by step and rewrite the content to a thread. `
-		+ `1. Each paragraph must be under 240 characters. `
-		+ `2. The starting line is \`THREAD START\n\`, and the ending line is \`\nTHREAD END\`. `
-		+ `3. You must use \`\n\n---\n\n\` to separate each paragraph! Then return it without any other changes. `
-		+ `4. Make it as engaging as possible.`
-		+ `5. Output in the same language as the source, do not output English if it is not English.\n The original content:\n\n`
-		+ `${selectedText}`;
+export function rewriteTweetThreadSelectionPrompt(
+	selectedText: string
+): string {
+	return (
+		`Please follow the instructions closely step by step and rewrite the content to a thread. ` +
+		`1. Each paragraph must be under 240 characters. ` +
+		`2. The starting line is \`THREAD START\n\`, and the ending line is \`\nTHREAD END\`. ` +
+		`3. You must use \`\n\n---\n\n\` to separate each paragraph! Then return it without any other changes. ` +
+		`4. Make it as engaging as possible.` +
+		`5. Output in the same language as the source, do not output English if it is not English.\n The original content:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function rewriteShorterSelectionPrompt(selectedText: string): string {
-	return `Please rewrite the following text to make it half as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:\n`
-		+ `${selectedText}`;
+	return (
+		`Please rewrite the following text to make it half as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:\n` +
+		`${selectedText}`
+	);
 }
 
 export function rewriteLongerSelectionPrompt(selectedText: string): string {
-	return `Please rewrite the following text to make it twice as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:\n`
-		+ `${selectedText}`;
+	return (
+		`Please rewrite the following text to make it twice as long while keeping the meaning as much as possible. Output in the same language as the source, do not output English if it is not English:\n` +
+		`${selectedText}`
+	);
 }
 
 export function eli5SelectionPrompt(selectedText: string): string {
-	return `Please explain the following text like I'm 5 years old. Output in the same language as the source, do not output English if it is not English:\n\n`
-		+ `${selectedText}`;
+	return (
+		`Please explain the following text like I'm 5 years old. Output in the same language as the source, do not output English if it is not English:\n\n` +
+		`${selectedText}`
+	);
 }
 
-export function rewritePressReleaseSelectionPrompt(selectedText: string): string {
-	return `Please rewrite the following text to make it sound like a press release. Output in the same language as the source, do not output English if it is not English:\n\n`
-		+ `${selectedText}`;
+export function rewritePressReleaseSelectionPrompt(
+	selectedText: string
+): string {
+	return (
+		`Please rewrite the following text to make it sound like a press release. Output in the same language as the source, do not output English if it is not English:\n\n` +
+		`${selectedText}`
+	);
 }
 
 export function createTranslateSelectionPrompt(language?: string) {
 	return (selectedText: string): string => {
-		return `Please translate the following text to ${language}:\n\n` + `${selectedText}`;
+		return (
+			`Please translate the following text to ${language}:\n\n` +
+			`${selectedText}`
+		);
 	};
 }
 
 export function createChangeToneSelectionPrompt(tone?: string) {
 	return (selectedText: string): string => {
-		return `Please change the tone of the following text to ${tone}. Output in the same language as the source, do not output English if it is not English:\n\n` + `${selectedText}`;
+		return (
+			`Please change the tone of the following text to ${tone}. Output in the same language as the source, do not output English if it is not English:\n\n` +
+			`${selectedText}`
+		);
 	};
 }
 
-export function extractChatHistory(memoryVariables: MemoryVariables): [string, string][] {
+export function extractChatHistory(
+	memoryVariables: MemoryVariables
+): [string, string][] {
 	const chatHistory: [string, string][] = [];
 	const { history } = memoryVariables;
 

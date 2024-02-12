@@ -6,7 +6,7 @@ import {
 	ModelProviders,
 	OLLAMA_MODELS,
 	OPENAI_MODELS,
-	OPENROUTERAI_MODELS
+	OPENROUTERAI_MODELS,
 } from '@/constants';
 import { ProxyChatOpenAI } from '@/langchainWrappers';
 import { ChatOllama } from '@langchain/community/chat_models/ollama';
@@ -28,15 +28,11 @@ export default class ChatModelManager {
 		}
 	>;
 
-	private constructor(
-		private langChainParams: LangChainParams
-	) {
+	private constructor(private langChainParams: LangChainParams) {
 		this.buildModelMap();
 	}
 
-	static getInstance(
-		langChainParams: LangChainParams
-	): ChatModelManager {
+	static getInstance(langChainParams: LangChainParams): ChatModelManager {
 		if (!ChatModelManager.instance) {
 			ChatModelManager.instance = new ChatModelManager(langChainParams);
 		}
@@ -110,7 +106,8 @@ export default class ChatModelManager {
 				maxTokens: params.maxTokens,
 				azureOpenAIApiKey: params.azureOpenAIApiKey,
 				azureOpenAIApiInstanceName: params.azureOpenAIApiInstanceName,
-				azureOpenAIApiDeploymentName: params.azureOpenAIApiDeploymentName,
+				azureOpenAIApiDeploymentName:
+					params.azureOpenAIApiDeploymentName,
 				azureOpenAIApiVersion: params.azureOpenAIApiVersion,
 			},
 			[ModelProviders.GOOGLE]: {
@@ -126,12 +123,19 @@ export default class ChatModelManager {
 				openAIProxyBaseUrl: `${params.lmStudioBaseUrl}`,
 			},
 			[ModelProviders.OLLAMA]: {
-				...(params.ollamaBaseUrl ? { baseUrl: params.ollamaBaseUrl } : {}),
+				...(params.ollamaBaseUrl
+					? { baseUrl: params.ollamaBaseUrl }
+					: {}),
 				modelName: params.ollamaModel,
 			},
 		};
 
-		return { ...baseConfig, ...(providerConfig[chatModelProvider as keyof typeof providerConfig] || {}) };
+		return {
+			...baseConfig,
+			...(providerConfig[
+				chatModelProvider as keyof typeof providerConfig
+			] || {}),
+		};
 	}
 
 	private buildModelMap() {
@@ -139,7 +143,8 @@ export default class ChatModelManager {
 		const modelMap = ChatModelManager.modelMap;
 
 		const OpenAIChatModel = this.langChainParams.openAIProxyBaseUrl
-			? ProxyChatOpenAI : ChatOpenAI;
+			? ProxyChatOpenAI
+			: ChatOpenAI;
 
 		const modelConfigurations = [
 			{
@@ -180,14 +185,16 @@ export default class ChatModelManager {
 			},
 		];
 
-		modelConfigurations.forEach(({ models, apiKey, constructor, vendor }) => {
-			models.forEach(modelDisplayNameKey => {
-				modelMap[modelDisplayNameKey] = {
-					hasApiKey: Boolean(apiKey),
-					AIConstructor: constructor,
-					vendor: vendor,
-				};
-			});
-		});
+		modelConfigurations.forEach(
+			({ models, apiKey, constructor, vendor }) => {
+				models.forEach((modelDisplayNameKey) => {
+					modelMap[modelDisplayNameKey] = {
+						hasApiKey: Boolean(apiKey),
+						AIConstructor: constructor,
+						vendor: vendor,
+					};
+				});
+			}
+		);
 	}
 }

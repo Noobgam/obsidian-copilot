@@ -1,9 +1,9 @@
 import { SetChainOptions } from '@/aiParams';
-import { AI_SENDER, ChatModelDisplayNames, } from '@/constants';
+import { AI_SENDER, ChatModelDisplayNames } from '@/constants';
 import { ChatMessage } from '@/sharedState';
-import { getFileContent, getFileName, stringToChainType, } from '@/utils';
+import { getFileContent, getFileName, stringToChainType } from '@/utils';
 import { Notice } from 'obsidian';
-import React, { useEffect, useState, } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ChainType } from '@/chainFactory';
 import {
@@ -45,7 +45,9 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
 		setCurrentModel(event.target.value);
 	};
 
-	const handleChainChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+	const handleChainChange = async (
+		event: React.ChangeEvent<HTMLSelectElement>
+	) => {
 		setSelectedChain(stringToChainType(event.target.value));
 	};
 
@@ -94,38 +96,71 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
 						value={currentModel}
 						onChange={handleModelChange}
 					>
-						<option value={ChatModelDisplayNames.GPT_35_TURBO}>{ChatModelDisplayNames.GPT_35_TURBO}</option>
-						<option value={ChatModelDisplayNames.GPT_35_TURBO_16K}>{ChatModelDisplayNames.GPT_35_TURBO_16K}</option>
-						<option value={ChatModelDisplayNames.GPT_4}>{ChatModelDisplayNames.GPT_4}</option>
-						<option value={ChatModelDisplayNames.GPT_4_TURBO}>{ChatModelDisplayNames.GPT_4_TURBO}</option>
-						<option value={ChatModelDisplayNames.GPT_4_32K}>{ChatModelDisplayNames.GPT_4_32K}</option>
+						<option value={ChatModelDisplayNames.GPT_35_TURBO}>
+							{ChatModelDisplayNames.GPT_35_TURBO}
+						</option>
+						<option value={ChatModelDisplayNames.GPT_35_TURBO_16K}>
+							{ChatModelDisplayNames.GPT_35_TURBO_16K}
+						</option>
+						<option value={ChatModelDisplayNames.GPT_4}>
+							{ChatModelDisplayNames.GPT_4}
+						</option>
+						<option value={ChatModelDisplayNames.GPT_4_TURBO}>
+							{ChatModelDisplayNames.GPT_4_TURBO}
+						</option>
+						<option value={ChatModelDisplayNames.GPT_4_32K}>
+							{ChatModelDisplayNames.GPT_4_32K}
+						</option>
 						{/* <option value={ChatModelDisplayNames.CLAUDE_1}>{ChatModelDisplayNames.CLAUDE_1}</option>
             <option value={ChatModelDisplayNames.CLAUDE_1_100K}>{ChatModelDisplayNames.CLAUDE_1_100K}</option>
             <option value={ChatModelDisplayNames.CLAUDE_INSTANT_1}>{ChatModelDisplayNames.CLAUDE_INSTANT_1}</option>
             <option value={ChatModelDisplayNames.CLAUDE_INSTANT_1_100K}>{ChatModelDisplayNames.CLAUDE_INSTANT_1_100K}</option> */}
-						<option value={ChatModelDisplayNames.AZURE_GPT_35_TURBO}>{ChatModelDisplayNames.AZURE_GPT_35_TURBO}</option>
 						<option
-							value={ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K}>{ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K}</option>
-						<option value={ChatModelDisplayNames.AZURE_GPT_4}>{ChatModelDisplayNames.AZURE_GPT_4}</option>
-						<option value={ChatModelDisplayNames.AZURE_GPT_4_32K}>{ChatModelDisplayNames.AZURE_GPT_4_32K}</option>
-						<option value={ChatModelDisplayNames.GEMINI_PRO}>{ChatModelDisplayNames.GEMINI_PRO}</option>
-						<option value={ChatModelDisplayNames.OPENROUTERAI}>{ChatModelDisplayNames.OPENROUTERAI}</option>
-						<option value={ChatModelDisplayNames.LM_STUDIO}>{ChatModelDisplayNames.LM_STUDIO}</option>
-						<option value={ChatModelDisplayNames.OLLAMA}>{ChatModelDisplayNames.OLLAMA}</option>
+							value={ChatModelDisplayNames.AZURE_GPT_35_TURBO}
+						>
+							{ChatModelDisplayNames.AZURE_GPT_35_TURBO}
+						</option>
+						<option
+							value={ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K}
+						>
+							{ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K}
+						</option>
+						<option value={ChatModelDisplayNames.AZURE_GPT_4}>
+							{ChatModelDisplayNames.AZURE_GPT_4}
+						</option>
+						<option value={ChatModelDisplayNames.AZURE_GPT_4_32K}>
+							{ChatModelDisplayNames.AZURE_GPT_4_32K}
+						</option>
+						<option value={ChatModelDisplayNames.GEMINI_PRO}>
+							{ChatModelDisplayNames.GEMINI_PRO}
+						</option>
+						<option value={ChatModelDisplayNames.OPENROUTERAI}>
+							{ChatModelDisplayNames.OPENROUTERAI}
+						</option>
+						<option value={ChatModelDisplayNames.LM_STUDIO}>
+							{ChatModelDisplayNames.LM_STUDIO}
+						</option>
+						<option value={ChatModelDisplayNames.OLLAMA}>
+							{ChatModelDisplayNames.OLLAMA}
+						</option>
 					</select>
 					<span className="tooltip-text">Model Selection</span>
 				</div>
 			</div>
 			<button className="chat-icon-button" onClick={onStopGenerating}>
-				<StopIcon className="icon-scaler"/>
+				<StopIcon className="icon-scaler" />
 				<span className="tooltip-text">Stop Generating</span>
 			</button>
 			<button className="chat-icon-button" onClick={onNewChat}>
-				<RefreshIcon className="icon-scaler"/>
-				<span className="tooltip-text">New Chat<br/>(unsaved history will be lost)</span>
+				<RefreshIcon className="icon-scaler" />
+				<span className="tooltip-text">
+					New Chat
+					<br />
+					(unsaved history will be lost)
+				</span>
 			</button>
 			<button className="chat-icon-button" onClick={onSaveAsNote}>
-				<SaveAsNoteIcon className="icon-scaler"/>
+				<SaveAsNoteIcon className="icon-scaler" />
 				<span className="tooltip-text">Save as Note</span>
 			</button>
 			<div className="chat-icon-selection-tooltip">
@@ -143,15 +178,29 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
 				</div>
 			</div>
 			{selectedChain === 'llm_chain' && (
-				<button className="chat-icon-button" onClick={onSendActiveNoteToPrompt}>
-					<SendActiveNoteToPromptIcon className="icon-scaler"/>
-					<span className="tooltip-text">Send Note(s) to Prompt<br/>(Set with Copilot command.<br/>Default is active note)</span>
+				<button
+					className="chat-icon-button"
+					onClick={onSendActiveNoteToPrompt}
+				>
+					<SendActiveNoteToPromptIcon className="icon-scaler" />
+					<span className="tooltip-text">
+						Send Note(s) to Prompt
+						<br />
+						(Set with Copilot command.
+						<br />
+						Default is active note)
+					</span>
 				</button>
 			)}
 			{selectedChain === 'retrieval_qa' && (
-				<button className="chat-icon-button" onClick={onForceRebuildActiveNoteContext}>
-					<UseActiveNoteAsContextIcon className="icon-scaler"/>
-					<span className="tooltip-text">Rebuild Index for Active Note</span>
+				<button
+					className="chat-icon-button"
+					onClick={onForceRebuildActiveNoteContext}
+				>
+					<UseActiveNoteAsContextIcon className="icon-scaler" />
+					<span className="tooltip-text">
+						Rebuild Index for Active Note
+					</span>
 				</button>
 			)}
 		</div>
