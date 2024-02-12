@@ -2,39 +2,44 @@ import { ChatMessage } from '@/sharedState';
 import { USER_SENDER } from '@/constants';
 
 export type ContextNote = {
-	notePath: string;
-	noteContent: string;
-}
+  notePath: string;
+  noteContent: string;
+};
 
 export type ChatContext = {
-	additionalNotes: ContextNote[],
-}
+  additionalNotes: ContextNote[];
+};
 
 export const EMPTY_CHAT_CONTEXT: ChatContext = {
-	additionalNotes: []
-}
+  additionalNotes: [],
+};
 
 function contextIsEmpty(chatContext: ChatContext) {
-	return chatContext.additionalNotes.length == 0;
+  return chatContext.additionalNotes.length == 0;
 }
 
-// TODO: I think we can't do this in react, can we?
-export function combineChatContext(oldValue: ChatContext | null, newValue: ChatContext) {
-	if (oldValue === null) {
-		return newValue;
-	}
-	return {
-		additionalNotes: [...oldValue.additionalNotes, ...newValue.additionalNotes]
-	}
+export function combineChatContext(
+  oldValue: ChatContext | null,
+  newValue: ChatContext
+) {
+  if (oldValue === null) {
+    return newValue;
+  }
+  return {
+    additionalNotes: [...oldValue.additionalNotes, ...newValue.additionalNotes],
+  };
 }
 
-export function convertToPrompt(chatContext: ChatContext, userMessage: string): {
-	visibleMessage: ChatMessage,
-	invisibleMessage: ChatMessage
+export function convertToPrompt(
+  chatContext: ChatContext,
+  userMessage: string
+): {
+  visibleMessage: ChatMessage;
+  invisibleMessage: ChatMessage;
 } {
-	const invisibleMessageContent = contextIsEmpty(chatContext)
-		? userMessage
-		: `Here is additional helpful context from notes:
+  const invisibleMessageContent = contextIsEmpty(chatContext)
+    ? userMessage
+    : `Here is additional helpful context from notes:
 		\`\`\`
 		${JSON.stringify(chatContext)}
 		\`\`\`.
@@ -42,16 +47,16 @@ export function convertToPrompt(chatContext: ChatContext, userMessage: string): 
 		${userMessage}
 	`;
 
-	return {
-		visibleMessage: {
-			sender: USER_SENDER,
-			message: userMessage,
-			isVisible: true,
-		},
-		invisibleMessage: {
-			sender: USER_SENDER,
-			message: invisibleMessageContent,
-			isVisible: false,
-		}
-	}
+  return {
+    visibleMessage: {
+      sender: USER_SENDER,
+      message: userMessage,
+      isVisible: true,
+    },
+    invisibleMessage: {
+      sender: USER_SENDER,
+      message: invisibleMessageContent,
+      isVisible: false,
+    },
+  };
 }

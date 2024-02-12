@@ -1,6 +1,9 @@
 import * as Obsidian from 'obsidian';
-import { getNotesFromPath, isFolderMatch, processVariableName } from '../src/utils';
-
+import {
+  getNotesFromPath,
+  isFolderMatch,
+  processVariableName,
+} from '../src/utils';
 
 describe('isFolderMatch', () => {
   it('should return file from the folder name 1', async () => {
@@ -75,9 +78,7 @@ describe('getNotesFromPath', () => {
   it('should return filtered markdown files 3', async () => {
     const vault = new Obsidian.Vault();
     const files = await getNotesFromPath(vault, 'note4.md');
-    expect(files).toEqual([
-      { path: 'note4.md' },
-    ]);
+    expect(files).toEqual([{ path: 'note4.md' }]);
   });
 
   it('should return filtered markdown files 4', async () => {

@@ -1,41 +1,37 @@
 import { LangChainParams } from '@/aiParams';
 import {
-	ChatPromptTemplate,
-	HumanMessagePromptTemplate,
-	MessagesPlaceholder,
-	SystemMessagePromptTemplate,
+  ChatPromptTemplate,
+  HumanMessagePromptTemplate,
+  MessagesPlaceholder,
+  SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 
 export default class PromptManager {
-	private static instance: PromptManager;
-	private chatPrompt: ChatPromptTemplate;
+  private static instance: PromptManager;
+  private chatPrompt: ChatPromptTemplate;
 
-	private constructor(
-		private langChainParams: LangChainParams
-	) {
-		this.initChatPrompt();
-	}
+  private constructor(private langChainParams: LangChainParams) {
+    this.initChatPrompt();
+  }
 
-	static getInstance(
-		langChainParams: LangChainParams
-	): PromptManager {
-		if (!PromptManager.instance) {
-			PromptManager.instance = new PromptManager(langChainParams);
-		}
-		return PromptManager.instance;
-	}
+  static getInstance(langChainParams: LangChainParams): PromptManager {
+    if (!PromptManager.instance) {
+      PromptManager.instance = new PromptManager(langChainParams);
+    }
+    return PromptManager.instance;
+  }
 
-	getChatPrompt(): ChatPromptTemplate {
-		return this.chatPrompt;
-	}
+  getChatPrompt(): ChatPromptTemplate {
+    return this.chatPrompt;
+  }
 
-	private initChatPrompt(): void {
-		this.chatPrompt = ChatPromptTemplate.fromMessages([
-			SystemMessagePromptTemplate.fromTemplate(
-				this.langChainParams.systemMessage
-			),
-			new MessagesPlaceholder('history'),
-			HumanMessagePromptTemplate.fromTemplate('{input}'),
-		]);
-	}
+  private initChatPrompt(): void {
+    this.chatPrompt = ChatPromptTemplate.fromMessages([
+      SystemMessagePromptTemplate.fromTemplate(
+        this.langChainParams.systemMessage
+      ),
+      new MessagesPlaceholder('history'),
+      HumanMessagePromptTemplate.fromTemplate('{input}'),
+    ]);
+  }
 }

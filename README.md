@@ -7,4 +7,4 @@ Previous owner doesn't seem to care about the features I need and [refuses](http
 
 # Main differences for now:
 
-* Supports actual chat with prompt by stuffing the prompt into 
+- Supports actual chat with prompt by stuffing the prompt into

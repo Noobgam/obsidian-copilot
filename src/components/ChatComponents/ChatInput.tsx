@@ -1,67 +1,71 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 interface ChatInputProps {
-	inputMessage: string;
-	setInputMessage: (message: string) => void;
-	handleKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-	handleSendMessage: () => void;
-	getChatVisibility: () => Promise<boolean>;
+  inputMessage: string;
+  setInputMessage: (message: string) => void;
+  handleKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  handleSendMessage: () => void;
+  getChatVisibility: () => Promise<boolean>;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
-	inputMessage, setInputMessage, handleKeyDown, handleSendMessage, getChatVisibility,
+  inputMessage,
+  setInputMessage,
+  handleKeyDown,
+  handleSendMessage,
+  getChatVisibility,
 }) => {
-	const [rows, setRows] = useState(1);
-	const [shouldFocus, setShouldFocus] = useState(false);
-	const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [rows, setRows] = useState(1);
+  const [shouldFocus, setShouldFocus] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-		setInputMessage(event.target.value);
-		updateRows(event.target.value);
-	};
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputMessage(event.target.value);
+    updateRows(event.target.value);
+  };
 
-	const updateRows = (text: string) => {
-		const lineHeight = 20; // Adjust this value based on CSS line-height
-		const maxHeight = 200; // Match this to the max-height value in CSS
-		const minRows = 1;
+  const updateRows = (text: string) => {
+    const lineHeight = 20; // Adjust this value based on CSS line-height
+    const maxHeight = 200; // Match this to the max-height value in CSS
+    const minRows = 1;
 
-		const rowsNeeded = Math.min(
-			Math.max(text.split('\n').length, minRows), Math.floor(maxHeight / lineHeight)
-		);
-		setRows(rowsNeeded);
-	};
+    const rowsNeeded = Math.min(
+      Math.max(text.split('\n').length, minRows),
+      Math.floor(maxHeight / lineHeight)
+    );
+    setRows(rowsNeeded);
+  };
 
-	// Effect hook to get the chat visibility
-	useEffect(() => {
-		const fetchChatVisibility = async () => {
-			const visibility = await getChatVisibility();
-			setShouldFocus(visibility);
-		};
-		fetchChatVisibility();
-	}, [getChatVisibility]);
+  // Effect hook to get the chat visibility
+  useEffect(() => {
+    const fetchChatVisibility = async () => {
+      const visibility = await getChatVisibility();
+      setShouldFocus(visibility);
+    };
+    fetchChatVisibility();
+  }, [getChatVisibility]);
 
-	// This effect will run every time the shouldFocus state is updated
-	useEffect(() => {
-		if (textAreaRef.current && shouldFocus) {
-			textAreaRef.current.focus();
-		}
-	}, [shouldFocus]);
+  // This effect will run every time the shouldFocus state is updated
+  useEffect(() => {
+    if (textAreaRef.current && shouldFocus) {
+      textAreaRef.current.focus();
+    }
+  }, [shouldFocus]);
 
-	return (
-		<div className="chat-input-container">
+  return (
+    <div className="chat-input-container">
       <textarea
-				ref={textAreaRef}
-				className="chat-input-textarea"
-				placeholder="Enter your message here..."
-				value={inputMessage}
-				onChange={handleInputChange}
-				onKeyDown={handleKeyDown}
-				rows={rows}
-			/>
-			<button onClick={handleSendMessage}>Send</button>
-		</div>
-	);
+        ref={textAreaRef}
+        className="chat-input-textarea"
+        placeholder="Enter your message here..."
+        value={inputMessage}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        rows={rows}
+      />
+      <button onClick={handleSendMessage}>Send</button>
+    </div>
+  );
 };
 
 export default ChatInput;
-
