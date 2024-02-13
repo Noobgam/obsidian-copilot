@@ -1,5 +1,5 @@
 import { ChainType } from '@/chainFactory';
-import { ChatPromptTemplate } from 'langchain/prompts';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export interface ModelConfig {
   modelName: string;
