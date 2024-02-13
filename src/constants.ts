@@ -8,6 +8,7 @@ export type ALL_SENDERS = typeof USER_SENDER | typeof AI_SENDER;
 
 export const DEFAULT_SYSTEM_PROMPT = `
 	You are Obsidian Copilot, a helpful assistant that integrates AI to Obsidian note-taking.
+	Be mindful that your response will be rendered in markdown, default to markdown formatting of your response. 
 `;
 
 export enum ChatModels {
