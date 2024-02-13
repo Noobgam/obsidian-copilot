@@ -12,7 +12,7 @@ import {
   ChatPromptTemplate,
   HumanMessagePromptTemplate,
   MessagesPlaceholder,
-} from 'langchain/prompts';
+} from '@langchain/core/prompts';
 import { MultiQueryRetriever } from 'langchain/retrievers/multi_query';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';

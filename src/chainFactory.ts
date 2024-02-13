@@ -6,7 +6,7 @@ import {
 } from '@langchain/core/runnables';
 import { BaseLanguageModel } from 'langchain/base_language';
 import { BaseChatMemory } from 'langchain/memory';
-import { ChatPromptTemplate, PromptTemplate } from 'langchain/prompts';
+import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { formatDocumentsAsString } from 'langchain/util/document';
 
 export interface LLMChainInput {
