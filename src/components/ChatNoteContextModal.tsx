@@ -47,29 +47,29 @@ export class ChatNoteContextModal extends Modal {
     });
     pathField.setAttribute('name', 'folderPath');
 
-    pathContainer.createEl('h3', { text: 'Filter by Tags', cls: 'copilot-command-header' });
+    pathContainer.createEl('h3', {
+      text: 'Filter by Tags',
+      cls: 'copilot-command-header',
+    });
     const descTagsFragment = createFragment((frag) => {
-      frag.createEl(
-        'strong',
-        { text: 'Only tags in note property are used, tags in note content are not used.' }
-      )
-      frag.createEl('p', { text: 'All notes under the path above are further filtered by the specified tags. If no path is provided, only tags are used. Multiple tags should be separated by commas. ' });
-      frag.createEl(
-        'strong',
-        { text: 'Tags function as an OR filter, ' }
+      frag.createEl('strong', {
+        text: 'Only tags in note property are used, tags in note content are not used.',
+      });
+      frag.createEl('p', {
+        text: 'All notes under the path above are further filtered by the specified tags. If no path is provided, only tags are used. Multiple tags should be separated by commas. ',
+      });
+      frag.createEl('strong', { text: 'Tags function as an OR filter, ' });
+      frag.appendText(
+        ' any note that matches one of the tags will be sent to the prompt when button is clicked in Chat mode.'
       );
-      frag.appendText(' any note that matches one of the tags will be sent to the prompt when button is clicked in Chat mode.');
     });
     pathContainer.appendChild(descTagsFragment);
 
-    const tagsField = pathContainer.createEl(
-      'input',
-      {
-        type: 'text',
-        cls: 'copilot-command-input',
-        value: this.settings.chatNoteContextTags.join(','),
-      }
-    );
+    const tagsField = pathContainer.createEl('input', {
+      type: 'text',
+      cls: 'copilot-command-input',
+      value: this.settings.chatNoteContextTags.join(','),
+    });
     tagsField.setAttribute('name', 'tags');
 
     const submitButtonContainer = formContainer.createEl('div', {
@@ -89,9 +89,9 @@ export class ChatNoteContextModal extends Modal {
 
       const tagsValue = tagsField.value
         .split(',')
-        .map(tag => tag.trim())
-        .map(tag => tag.replace('#', ''))
-        .filter(tag => tag !== '');
+        .map((tag) => tag.trim())
+        .map((tag) => tag.replace('#', ''))
+        .filter((tag) => tag !== '');
 
       this.onSubmit(pathValue, tagsValue);
       this.close();

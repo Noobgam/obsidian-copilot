@@ -450,7 +450,7 @@ export default class CopilotPlugin extends Plugin {
           async (path: string, tags: string[]) => {
             // Store the path in the plugin's settings, default to empty string
             this.settings.chatNoteContextPath = path;
-          this.settings.chatNoteContextTags = tags;
+            this.settings.chatNoteContextTags = tags;
             await this.saveSettings();
           }
         ).open();

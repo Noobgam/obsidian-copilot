@@ -1,8 +1,9 @@
 import * as Obsidian from 'obsidian';
+import { TFile } from 'obsidian';
 import {
- TFile } from 'obsidian';
-import { getNotesFromPath,
- getNotesFromTags, isFolderMatch,
+  getNotesFromPath,
+  getNotesFromTags,
+  isFolderMatch,
   processVariableName,
 } from '../src/utils';
 
@@ -152,7 +153,7 @@ describe('getNotesFromTags', () => {
     const expectedPaths = ['test/test2/note1.md', 'note4.md'];
 
     const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);
@@ -164,7 +165,7 @@ describe('getNotesFromTags', () => {
     const expectedPaths = ['test/note2.md'];
 
     const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);
@@ -186,7 +187,7 @@ describe('getNotesFromTags', () => {
     const expectedPaths = ['test/test2/note1.md', 'test/note2.md', 'note4.md'];
 
     const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);
@@ -202,7 +203,7 @@ describe('getNotesFromTags', () => {
     const expectedPaths = ['test/test2/note1.md'];
 
     const result = await getNotesFromTags(mockVault, tags, noteFiles);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);

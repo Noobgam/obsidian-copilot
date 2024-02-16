@@ -183,7 +183,10 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
             <br />
             (Set with Copilot command:
             <br />
-            set note context <br/>in Chat mode.<br/>Default is active note)
+            set note context <br />
+            in Chat mode.
+            <br />
+            Default is active note)
           </span>
         </button>
       )}

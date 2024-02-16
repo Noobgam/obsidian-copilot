@@ -13,6 +13,7 @@ This is not acceptable for any OSS, thus the necessity for a hardfork.
 # Main differences for now:
 
 - Supports actual chat with prompt by stuffing the prompt into
+- Correct tag detection (does not detect tags defined by hashtag in upstream for whatever reason)
 
 # Roadmap:
 

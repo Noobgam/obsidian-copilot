@@ -176,27 +176,17 @@ const Chat: React.FC<ChatProps> = ({
       ];
     }
     if (settings.chatNoteContextTags) {
-      const tags = settings.chatNoteContextTags.split(',');
-      // TODO: there should probably be a better way, obsidian has native link support.
-      const allFiles = app.vault.getFiles();
-      for (const file of allFiles) {
-        const content = await getFileContent(file);
-        if (!content) {
-          continue;
-        }
-        for (const tag of tags) {
-          if (content.includes(tag)) {
-            noteFiles.push(file);
-            break;
-          }
-        }
-      }
-    }
-    if (settings.chatNoteContextTags) {
       // Get all notes with the specified tags
       // If path is provided, get all notes with the specified tags in the path
       // If path is not provided, get all notes with the specified tags
-      noteFiles = await getNotesFromTags(vault, settings.chatNoteContextTags, noteFiles);
+      noteFiles = [
+        ...noteFiles,
+        ...(await getNotesFromTags(
+          vault,
+          settings.chatNoteContextTags,
+          noteFiles
+        )),
+      ];
     }
     const file = app.workspace.getActiveFile();
     // If no note context provided, default to the active note
@@ -221,7 +211,7 @@ const Chat: React.FC<ChatProps> = ({
       const filePath = file.path;
       if (content) {
         if (notes.find((s) => s.notePath === filePath) === undefined) {
-          notes.push({ notePath: filePath, noteContent: content, tags});
+          notes.push({ notePath: filePath, noteContent: content, tags });
         }
       }
     }
