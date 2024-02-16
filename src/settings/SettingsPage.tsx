@@ -39,7 +39,7 @@ interface MainSettings {
 
 interface ChatNoteContextSettings {
   chatNoteContextPath: string;
-  chatNoteContextTags: string;
+  chatNoteContextTags: string[];
 }
 
 export class CopilotSettingTab extends PluginSettingTab {

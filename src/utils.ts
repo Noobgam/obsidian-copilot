@@ -10,7 +10,7 @@ import { MemoryVariables } from '@langchain/core/memory';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { BaseChain, RetrievalQAChain } from 'langchain/chains';
 import moment from 'moment';
-import { TFile, Vault } from 'obsidian';
+import { TFile, Vault, parseYaml } from 'obsidian';
 
 export const isFolderMatch = (
   fileFullpath: string,
@@ -44,6 +44,61 @@ export const getNotesFromPath = async (
     );
   });
 };
+
+export async function getTagsFromNote(
+  file: TFile,
+  vault: Vault
+): Promise<string[]> {
+  const fileContent = await vault.cachedRead(file);
+  if (fileContent.startsWith('---')) {
+    const frontMatter = parseYaml(fileContent.split('---')?.[1] ?? '') || {};
+    const tags = frontMatter.tags || [];
+    // Strip any '#' from the frontmatter tags. Obsidian sometimes has '#' sometimes doesn't...
+    return tags.map((tag: string) => tag.replace('#', ''));
+  }
+  return [];
+}
+
+// TODO: this method is shit.
+// obsidian can do this properly for you by using search.
+// e.g. `tag:#unprocessed_obsidianki` or `tag:unprocessed_obsidianki` in the search
+// that will remove the bizarre parsing from here and hand it over to obsidian
+export async function getNotesFromTags(
+  vault: Vault,
+  tags: string[],
+  noteFiles?: TFile[]
+): Promise<TFile[]> {
+  if (tags.length === 0) {
+    return [];
+  }
+
+  // Strip any '#' from the tags set from the user
+  tags = tags.map((tag) => tag.replace('#', ''));
+
+  const files =
+    noteFiles && noteFiles.length > 0
+      ? noteFiles
+      : await getNotesFromPath(vault, '/');
+  const filesWithTag = [];
+
+  for (const file of files) {
+    const fileContent = await vault.cachedRead(file);
+    const noteTags = await getTagsFromNote(file, vault);
+    if (
+      tags.some(
+        (tag) =>
+          noteTags.includes(tag) ||
+          fileContent.includes(`#${tag} `) ||
+          fileContent.includes(`#${tag}\n`) ||
+          fileContent.endsWith(`#${tag}`)
+      )
+    ) {
+      filesWithTag.push(file);
+    }
+  }
+
+  return filesWithTag;
+}
 
 export const stringToChainType = (chain: string): ChainType => {
   switch (chain) {
@@ -116,9 +171,12 @@ export const formatDateTime = (
   return formattedDateTime.format('YYYY_MM_DD-HH_mm_ss');
 };
 
-export async function getFileContent(file: TFile): Promise<string | null> {
+export async function getFileContent(
+  file: TFile,
+  vault: Vault
+): Promise<string | null> {
   if (file.extension != 'md') return null;
-  return await this.app.vault.cachedRead(file);
+  return await vault.cachedRead(file);
 }
 
 export function getFileName(file: TFile): string {
@@ -145,6 +203,45 @@ export function sanitizeSettings(settings: CopilotSettings): CopilotSettings {
     : contextTurns;
 
   return sanitizedSettings;
+}
+
+function getNoteTitleAndTags(noteWithTag: {
+  name: string;
+  content: string;
+  tags?: string[];
+}): string {
+  return (
+    `[[${noteWithTag.name}]]` +
+    (noteWithTag.tags ? `\ntags: ${noteWithTag.tags.join(',')}` : '')
+  );
+}
+
+function getChatContextStr(
+  chatNoteContextPath: string,
+  chatNoteContextTags: string[]
+): string {
+  const pathStr = chatNoteContextPath
+    ? `\nChat context by path: ${chatNoteContextPath}`
+    : '';
+  const tagsStr = chatNoteContextTags
+    ? `\nChat context by tags: ${chatNoteContextTags}`
+    : '';
+  return pathStr + tagsStr;
+}
+
+export function getSendChatContextNotesPrompt(
+  notes: { name: string; content: string }[],
+  chatNoteContextPath: string,
+  chatNoteContextTags: string[]
+): string {
+  const noteTitles = notes
+    .map((note) => getNoteTitleAndTags(note))
+    .join('\n\n');
+  return (
+    `Please read the notes below and be ready to answer questions about them. ` +
+    getChatContextStr(chatNoteContextPath, chatNoteContextTags) +
+    `\n\n${noteTitles}`
+  );
 }
 
 export function fixGrammarSpellingSelectionPrompt(

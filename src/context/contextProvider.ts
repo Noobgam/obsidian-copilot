@@ -4,6 +4,7 @@ import { USER_SENDER } from '@/constants';
 export type ContextNote = {
   notePath: string;
   noteContent: string;
+  tags: string[];
 };
 
 export type ChatContext = {

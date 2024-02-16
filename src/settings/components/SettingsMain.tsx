@@ -291,8 +291,8 @@ export default function SettingsMain({
         name="Chat note context tags"
         description="Comma-separated list of tags that will be fetched alongside active notes for context."
         placeholder="#copilot_notes,#copilot_other_notes"
-        value={chatNoteContextTags}
-        onChange={setChatNoteContextTags}
+        value={(chatNoteContextTags ?? []).join(',')}
+        onChange={(s) => setChatNoteContextTags(s.split(','))}
       />
     </>
   );
