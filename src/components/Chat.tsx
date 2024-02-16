@@ -20,6 +20,8 @@ import {
   getFileContent,
   getFileName,
   getNotesFromPath,
+  getNotesFromTags,
+  getTagsFromNote,
   glossaryPrompt,
   removeUrlsFromSelectionPrompt,
   rewriteLongerSelectionPrompt,
@@ -164,7 +166,6 @@ const Chat: React.FC<ChatProps> = ({
     let noteFiles: TFile[] = [];
 
     if (debug) {
-      console.log('Chat note context path:', settings.chatNoteContextPath);
       console.log(`Chat note context tags: '${settings.chatNoteContextTags}'`);
     }
     if (settings.chatNoteContextPath) {
@@ -191,7 +192,12 @@ const Chat: React.FC<ChatProps> = ({
         }
       }
     }
-
+    if (settings.chatNoteContextTags) {
+      // Get all notes with the specified tags
+      // If path is provided, get all notes with the specified tags in the path
+      // If path is not provided, get all notes with the specified tags
+      noteFiles = await getNotesFromTags(vault, settings.chatNoteContextTags, noteFiles);
+    }
     const file = app.workspace.getActiveFile();
     // If no note context provided, default to the active note
     if (noteFiles.length === 0) {
@@ -208,12 +214,14 @@ const Chat: React.FC<ChatProps> = ({
 
     const notes: ContextNote[] = [];
     for (const file of noteFiles) {
-      const content = await getFileContent(file);
+      // Get the content of the note
+      const content = await getFileContent(file, vault);
+      const tags = await getTagsFromNote(file, vault);
       // this is a relative path, right?
       const filePath = file.path;
       if (content) {
         if (notes.find((s) => s.notePath === filePath) === undefined) {
-          notes.push({ notePath: filePath, noteContent: content });
+          notes.push({ notePath: filePath, noteContent: content, tags});
         }
       }
     }
@@ -239,7 +247,7 @@ const Chat: React.FC<ChatProps> = ({
       console.error('No active note found.');
       return;
     }
-    const noteContent = await getFileContent(file);
+    const noteContent = await getFileContent(file, vault);
     const noteName = getFileName(file);
     if (!noteContent) {
       new Notice('No note content found.');
@@ -482,6 +490,7 @@ const Chat: React.FC<ChatProps> = ({
           onSendActiveNoteToPrompt={handleSendActiveNoteToPrompt}
           onForceRebuildActiveNoteContext={forceRebuildActiveNoteContext}
           addMessage={addMessage}
+          vault={vault}
         />
         <ChatInput
           inputMessage={inputMessage}

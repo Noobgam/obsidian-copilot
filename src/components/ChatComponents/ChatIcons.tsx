@@ -2,7 +2,7 @@ import { SetChainOptions } from '@/aiParams';
 import { AI_SENDER, ChatModelDisplayNames } from '@/constants';
 import { ChatMessage } from '@/sharedState';
 import { getFileContent, getFileName, stringToChainType } from '@/utils';
-import { Notice } from 'obsidian';
+import { Notice, Vault } from 'obsidian';
 import React, { useEffect, useState } from 'react';
 
 import { ChainType } from '@/chainFactory';
@@ -25,6 +25,7 @@ interface ChatIconsProps {
   onSendActiveNoteToPrompt: () => void;
   onForceRebuildActiveNoteContext: () => void;
   addMessage: (message: ChatMessage) => void;
+  vault: Vault;
 }
 
 const ChatIcons: React.FC<ChatIconsProps> = ({
@@ -38,6 +39,7 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
   onSendActiveNoteToPrompt,
   onForceRebuildActiveNoteContext,
   addMessage,
+  vault,
 }) => {
   const [selectedChain, setSelectedChain] = useState<ChainType>(currentChain);
 
@@ -69,7 +71,7 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
         console.error('No active note found.');
         return;
       }
-      const noteContent = await getFileContent(file);
+      const noteContent = await getFileContent(file, vault);
       const noteName = getFileName(file);
 
       const activeNoteOnMessage: ChatMessage = {
@@ -179,9 +181,9 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
           <span className="tooltip-text">
             Send Note(s) to Prompt
             <br />
-            (Set with Copilot command.
+            (Set with Copilot command:
             <br />
-            Default is active note)
+            set note context <br/>in Chat mode.<br/>Default is active note)
           </span>
         </button>
       )}
