@@ -50,13 +50,34 @@ export async function getTagsFromNote(
   vault: Vault
 ): Promise<string[]> {
   const fileContent = await vault.cachedRead(file);
+  return getTagsFromContent(fileContent);
+}
+
+export async function getTagsFromContent(fileContent: string) {
+  let allTags: string[] = []
   if (fileContent.startsWith('---')) {
-    const frontMatter = parseYaml(fileContent.split('---')?.[1] ?? '') || {};
-    const tags = frontMatter.tags || [];
-    // Strip any '#' from the frontmatter tags. Obsidian sometimes has '#' sometimes doesn't...
-    return tags.map((tag: string) => tag.replace('#', ''));
+    const endOfYaml = fileContent.indexOf('---', 3);
+    if (endOfYaml != -1) {
+      const noteProperties = parseYaml(fileContent.substring(4, endOfYaml)) || {};
+      const noteTags = noteProperties.tags || [];
+      allTags = [...allTags, ...noteTags];
+    }
   }
-  return [];
+  // this regex might not exactly match obsidian behaviour.
+  // Obsidian recognizes any alphanumeric sequence as well
+  // see the tests for the examples of tags that I have found obsidian to recognize
+  // keep in mind that in ui terms obsidian will also not recognize the tag '123' even if you put it into properties
+  const regex = /#([\p{L}\p{Nd}_\-]*\p{L}[\p{L}\p{Nd}_\-]*)\b/gu;
+  const regexTagMatches = fileContent.match(regex) || [];
+
+  return [...allTags, ...regexTagMatches].map(cleanTag);
+}
+
+function cleanTag(tag: string) {
+  if (tag.startsWith('#')) {
+    return tag.substring(1);
+  }
+  return tag;
 }
 
 // TODO: this method is shit.
@@ -82,17 +103,8 @@ export async function getNotesFromTags(
   const filesWithTag = [];
 
   for (const file of files) {
-    const fileContent = await vault.cachedRead(file);
     const noteTags = await getTagsFromNote(file, vault);
-    if (
-      tags.some(
-        (tag) =>
-          noteTags.includes(tag) ||
-          fileContent.includes(`#${tag} `) ||
-          fileContent.includes(`#${tag}\n`) ||
-          fileContent.endsWith(`#${tag}`)
-      )
-    ) {
+    if (tags.some(tag => noteTags.includes(tag))) {
       filesWithTag.push(file);
     }
   }
