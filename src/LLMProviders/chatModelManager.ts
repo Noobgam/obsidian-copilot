@@ -9,6 +9,7 @@ import {
   OPENROUTERAI_MODELS,
 } from '@/constants';
 import { ProxyChatOpenAI } from '@/langchainWrappers';
+import { getModelName } from '@/utils';
 import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { BaseChatModel } from 'langchain/chat_models/base';
@@ -46,6 +47,9 @@ export default class ChatModelManager {
     if (!ChatModelManager.modelMap.hasOwnProperty(modelDisplayName)) {
       throw new Error(`No model found for: ${modelDisplayName}`);
     }
+
+    // MUST update it since chatModelManager is a singleton.
+    this.langChainParams.model = getModelName(modelDisplayName);
 
     // Create and return the appropriate model
     const selectedModel = ChatModelManager.modelMap[modelDisplayName];
