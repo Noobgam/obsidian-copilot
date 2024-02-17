@@ -20,5 +20,6 @@ This is not acceptable for any OSS, thus the necessity for a hardfork.
 
 - [x] Add dumb configurable context (tags)
 - [ ] Get familiar with the code
+- [ ] Get a major refactoring in (rm singletons, extract classes, reactify the bad code)
 - [ ] Create agent mode for context
 - [ ] Register obsidian-commands for agent mode (read documents by path list)
