@@ -192,3 +192,30 @@ export default class ChatModelManager {
     });
   }
 }
+
+    const modelConfig = this.getModelConfig(selectedModel.vendor);
+
+    try {
+      const newModelInstance = new selectedModel.AIConstructor({
+        ...modelConfig,
+      });
+
+      // Set the new model
+      ChatModelManager.chatModel = newModelInstance;
+    } catch (error) {
+      console.error(error);
+      new Notice(`Error creating model: ${modelDisplayName}`);
+    }
+  }
+
+  validateChatModel(chatModel: BaseChatModel): boolean {
+    if (chatModel === undefined || chatModel === null) {
+      return false;
+    }
+    return true
+  }
+
+  async countTokens(inputStr: string): Promise<number> {
+    return ChatModelManager.chatModel.getNumTokens(inputStr);
+  }
+}
