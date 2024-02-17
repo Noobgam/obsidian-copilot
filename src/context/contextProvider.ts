@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/sharedState';
+import { ChatMessage, generateMessageId } from '@/sharedState';
 import { USER_SENDER } from '@/constants';
 
 export type ContextNote = {
@@ -36,11 +36,20 @@ export function convertToPrompt(
   userMessage: string
 ): {
   visibleMessage: ChatMessage;
-  invisibleMessage: ChatMessage;
+  invisibleMessage?: ChatMessage;
 } {
-  const invisibleMessageContent = contextIsEmpty(chatContext)
-    ? userMessage
-    : `Here is additional helpful context from notes:
+  if (contextIsEmpty(chatContext)) {
+    return {
+      visibleMessage: {
+        sender: USER_SENDER,
+        message: userMessage,
+        isVisible: true,
+        isInChain: true,
+        id: generateMessageId(),
+      },
+    };
+  }
+  const invisibleMessageContent = `Here is additional helpful context from notes:
 		\`\`\`
 		${JSON.stringify(chatContext)}
 		\`\`\`.
@@ -53,11 +62,15 @@ export function convertToPrompt(
       sender: USER_SENDER,
       message: userMessage,
       isVisible: true,
+      isInChain: false,
+      id: generateMessageId(),
     },
     invisibleMessage: {
       sender: USER_SENDER,
       message: invisibleMessageContent,
       isVisible: false,
+      isInChain: true,
+      id: generateMessageId(),
     },
   };
 }

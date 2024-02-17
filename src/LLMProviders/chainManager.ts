@@ -2,7 +2,7 @@ import { LangChainParams, SetChainOptions } from '@/aiParams';
 import ChainFactory, { ChainType } from '@/chainFactory';
 import { AI_SENDER, ChatModelDisplayNames } from '@/constants';
 import { ProxyChatOpenAI } from '@/langchainWrappers';
-import { ChatMessage } from '@/sharedState';
+import { ChatMessage, generateMessageId } from '@/sharedState';
 import { extractChatHistory, getModelName, isSupportedChain } from '@/utils';
 import VectorDBManager, { MemoryVector } from '@/vectorDBManager';
 import { ChatOllama } from '@langchain/community/chat_models/ollama';
@@ -382,6 +382,8 @@ export default class ChainManager {
           message: fullAIResponse,
           sender: AI_SENDER,
           isVisible: true,
+          isInChain: true,
+          id: generateMessageId(),
         });
       }
       updateCurrentAiMessage('');
