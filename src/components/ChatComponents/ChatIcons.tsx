@@ -113,21 +113,8 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
             <option value={ChatModelDisplayNames.GPT_4_32K}>
               {ChatModelDisplayNames.GPT_4_32K}
             </option>
-            {/* <option value={ChatModelDisplayNames.CLAUDE_1}>{ChatModelDisplayNames.CLAUDE_1}</option>
-            <option value={ChatModelDisplayNames.CLAUDE_1_100K}>{ChatModelDisplayNames.CLAUDE_1_100K}</option>
-            <option value={ChatModelDisplayNames.CLAUDE_INSTANT_1}>{ChatModelDisplayNames.CLAUDE_INSTANT_1}</option>
-            <option value={ChatModelDisplayNames.CLAUDE_INSTANT_1_100K}>{ChatModelDisplayNames.CLAUDE_INSTANT_1_100K}</option> */}
-            <option value={ChatModelDisplayNames.AZURE_GPT_35_TURBO}>
-              {ChatModelDisplayNames.AZURE_GPT_35_TURBO}
-            </option>
-            <option value={ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K}>
-              {ChatModelDisplayNames.AZURE_GPT_35_TURBO_16K}
-            </option>
-            <option value={ChatModelDisplayNames.AZURE_GPT_4}>
-              {ChatModelDisplayNames.AZURE_GPT_4}
-            </option>
-            <option value={ChatModelDisplayNames.AZURE_GPT_4_32K}>
-              {ChatModelDisplayNames.AZURE_GPT_4_32K}
+            <option value={ChatModelDisplayNames.AZURE_OPENAI}>
+              {ChatModelDisplayNames.AZURE_OPENAI}
             </option>
             <option value={ChatModelDisplayNames.GEMINI_PRO}>
               {ChatModelDisplayNames.GEMINI_PRO}
