@@ -48,6 +48,9 @@ export default class ChatModelManager {
       throw new Error(`No model found for: ${modelDisplayName}`);
     }
 
+    // MUST update it since chatModelManager is a singleton.
+    this.langChainParams.model = getModelName(modelDisplayName);
+
     // Create and return the appropriate model
     const selectedModel = ChatModelManager.modelMap[modelDisplayName];
     if (!selectedModel.hasApiKey) {
