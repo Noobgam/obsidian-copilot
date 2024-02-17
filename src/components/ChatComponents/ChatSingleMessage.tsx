@@ -1,7 +1,7 @@
 import {
   BotIcon,
   CheckIcon,
-  CopyClipboardIcon,
+  CopyClipboardIcon, EditIcon,
   UserIcon,
 } from '@/components/Icons';
 import ReactMarkdown from '@/components/Markdown/MemoizedReactMarkdown';
@@ -16,6 +16,11 @@ interface ChatSingleMessageProps {
 
 const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message }) => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
+
+  const editMessage = (id: string) => {
+    // TODO: implement
+    console.log(`Doing edit ${id}`);
+  }
 
   const copyToClipboard = () => {
     if (!navigator.clipboard || !navigator.clipboard.writeText) {
@@ -51,7 +56,14 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message }) => {
           )}
         </div>
       </div>
-      <button onClick={copyToClipboard} className="copy-message-button">
+      {
+        message.sender === USER_SENDER ? (
+          <button onClick={() => editMessage("stub_id")} className="chat-message-button">
+            <EditIcon/>
+          </button>
+        ): <></>
+      }
+      <button onClick={copyToClipboard} className="chat-message-button">
         {isCopied ? <CheckIcon /> : <CopyClipboardIcon />}
       </button>
     </div>
