@@ -31,7 +31,6 @@ export class CustomPromptProcessor {
   /**
    * Extract variables and get their content.
    *
-   * @param {CustomPrompt} doc - the custom prompt to process
    * @return {Promise<string[]>} the processed custom prompt
    */
   async extractVariablesFromPrompt(customPrompt: string): Promise<string[]> {
@@ -41,18 +40,13 @@ export class CustomPromptProcessor {
 
     while ((match = variableRegex.exec(customPrompt)) !== null) {
       const variableName = match[1].trim();
-      const processedVariableName = processVariableName(variableName);
-      const noteFiles = await getNotesFromPath(
-        this.vault,
-        processedVariableName
-      );
       const notes = [];
 
-      if (variableName.startsWith("#")) {
+      if (variableName.startsWith('#')) {
         // Handle tag-based variable for multiple tags
         const tagNames = variableName
           .slice(1)
-          .split(",")
+          .split(',')
           .map((tag) => tag.trim());
         const noteFiles = await getNotesFromTags(this.vault, tagNames);
         for (const file of noteFiles) {
@@ -93,9 +87,7 @@ export class CustomPromptProcessor {
     selectedText: string
   ): Promise<string> {
     const variablesWithContent =
-      await this.extractVariablesFromPrompt(
-      customPrompt
-    );
+      await this.extractVariablesFromPrompt(customPrompt);
     let processedPrompt = customPrompt;
     let index = 0; // Start with 0 for context0, context1, etc.
 
@@ -104,10 +96,10 @@ export class CustomPromptProcessor {
       return `{context${index++}}`;
     });
 
-    let additionalInfo = "";
-    if (processedPrompt.includes("{}")) {
+    let additionalInfo = '';
+    if (processedPrompt.includes('{}')) {
       // Replace {} with {selectedText}
-      processedPrompt = processedPrompt.replace(/\{\}/g, "{selectedText}");
+      processedPrompt = processedPrompt.replace(/\{\}/g, '{selectedText}');
       additionalInfo += `selectedText:\n\n ${selectedText}`;
     }
 
@@ -115,7 +107,10 @@ export class CustomPromptProcessor {
       additionalInfo += `\n\ncontext${i}:\n\n${variablesWithContent[i]}`;
     }
 
-    const endLine = "\nAvoid mentioning the variable names 'selectedText' or 'contextX' in the reply. ";
-    return processedPrompt + "\n\n" + additionalInfo + (index > 0 ? endLine : "");
+    const endLine =
+      "\nAvoid mentioning the variable names 'selectedText' or 'contextX' in the reply. ";
+    return (
+      processedPrompt + '\n\n' + additionalInfo + (index > 0 ? endLine : '')
+    );
   }
 }

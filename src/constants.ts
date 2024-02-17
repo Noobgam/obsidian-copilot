@@ -43,9 +43,7 @@ export const OPENAI_MODELS = new Set([
   ChatModelDisplayNames.LM_STUDIO,
 ]);
 
-export const AZURE_MODELS = new Set([
-  ChatModelDisplayNames.AZURE_OPENAI,
-]);
+export const AZURE_MODELS = new Set([ChatModelDisplayNames.AZURE_OPENAI]);
 
 export const GOOGLE_MODELS = new Set([ChatModelDisplayNames.GEMINI_PRO]);
 

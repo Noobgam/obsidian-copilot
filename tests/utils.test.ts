@@ -2,7 +2,8 @@ import * as Obsidian from 'obsidian';
 import { TFile } from 'obsidian';
 import {
   getNotesFromPath,
-  getNotesFromTags, getTagsFromContent,
+  getNotesFromTags,
+  getTagsFromContent,
   isFolderMatch,
   processVariableNameForNotePath,
 } from '../src/utils';
@@ -115,12 +116,16 @@ describe('getNotesFromPath', () => {
     });
 
     it('should return the note md filename with extra spaces 2', () => {
-      const variableName = processVariableNameForNotePath(' [[ test note   ]] ');
+      const variableName = processVariableNameForNotePath(
+        ' [[ test note   ]] '
+      );
       expect(variableName).toEqual('test note.md');
     });
 
     it('should return the note md filename with extra spaces 2', () => {
-      const variableName = processVariableNameForNotePath(' [[    test_note note   ]] ');
+      const variableName = processVariableNameForNotePath(
+        ' [[    test_note note   ]] '
+      );
       expect(variableName).toEqual('test_note note.md');
     });
 
@@ -148,14 +153,16 @@ describe('getNotesFromPath', () => {
 
 describe('getTagsFromContent', () => {
   it('with valid note with no tags returns empty list', async () => {
-    const result = await getTagsFromContent("some random text, --- even some yamlish thing ---. # some header ## some header 2");
+    const result = await getTagsFromContent(
+      'some random text, --- even some yamlish thing ---. # some header ## some header 2'
+    );
     expect(result).toEqual([]);
-  })
+  });
 
   it('empty note works', async () => {
     const result = await getTagsFromContent('');
     expect(result).toEqual([]);
-  })
+  });
 
   it('tags as properties work', async () => {
     const result = await getTagsFromContent(
@@ -165,8 +172,8 @@ describe('getTagsFromContent', () => {
       ---
       `
     );
-    expect(result).toEqual(['random_tag'])
-  })
+    expect(result).toEqual(['random_tag']);
+  });
 
   it('order of tags is preserved', async () => {
     const result = await getTagsFromContent(
@@ -177,8 +184,8 @@ describe('getTagsFromContent', () => {
       ---
       `
     );
-    expect(result).toEqual(['random_tag', 'random_tag2'])
-  })
+    expect(result).toEqual(['random_tag', 'random_tag2']);
+  });
 
   it('tags in note content work', async () => {
     const result = await getTagsFromContent(
@@ -190,39 +197,32 @@ describe('getTagsFromContent', () => {
       
       #random_tag_3`
     );
-    expect(result).toEqual(['random_tag', 'random_tag2', 'random_tag_3'])
-  })
+    expect(result).toEqual(['random_tag', 'random_tag2', 'random_tag_3']);
+  });
 
   it('Even weird tags are recognized', async () => {
     const result = await getTagsFromContent(
       `#abc1 #Abc2 #kek_lol-lmao #SomeFancy日本語でTag #123a`
-    )
-    expect(result).toEqual(
-      [
-        'abc1',
-        'Abc2',
-        'kek_lol-lmao',
-        'SomeFancy日本語でTag'
-      ]
-    )
-  })
-
-  it('Obscure tags are not recognized', async() => {
-    const result = await getTagsFromContent(
-      `#a+b #123`
-    )
+    );
     expect(result).toEqual([
-      'a'
-    ])
-  })
+      'abc1',
+      'Abc2',
+      'kek_lol-lmao',
+      'SomeFancy日本語でTag',
+      '123a',
+    ]);
+  });
+
+  it('Obscure tags are not recognized', async () => {
+    const result = await getTagsFromContent(`#a+b #123`);
+    expect(result).toEqual(['a']);
+  });
 
   it('mixed tag styles work', async () => {
-    const result = await getTagsFromContent(
-      `#random_tag_3`
-    );
-    expect(result).toEqual(['random_tag_3'])
-  })
-})
+    const result = await getTagsFromContent(`#random_tag_3`);
+    expect(result).toEqual(['random_tag_3']);
+  });
+});
 
 describe('getNotesFromTags', () => {
   it('should return files with specified tags 1', async () => {

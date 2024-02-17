@@ -18,7 +18,6 @@ import { Notice } from 'obsidian';
 export default class ChatModelManager {
   private static instance: ChatModelManager;
   private static chatModel: BaseChatModel;
-  private static chatOpenAI: ChatOpenAI;
   private static modelMap: Record<
     string,
     {
@@ -60,12 +59,10 @@ export default class ChatModelManager {
     const modelConfig = this.getModelConfig(selectedModel.vendor);
 
     try {
-      const newModelInstance = new selectedModel.AIConstructor({
+      // Set the new model
+      ChatModelManager.chatModel = new selectedModel.AIConstructor({
         ...modelConfig,
       });
-
-      // Set the new model
-      ChatModelManager.chatModel = newModelInstance;
     } catch (error) {
       console.error(error);
       new Notice(`Error creating model: ${modelDisplayName}`);
@@ -80,7 +77,7 @@ export default class ChatModelManager {
   }
 
   async countTokens(inputStr: string): Promise<number> {
-    return ChatModelManager.chatOpenAI.getNumTokens(inputStr);
+    return ChatModelManager.chatModel.getNumTokens(inputStr);
   }
 
   private getModelConfig(chatModelProvider: string): ModelConfig {
@@ -190,32 +187,5 @@ export default class ChatModelManager {
         };
       });
     });
-  }
-}
-
-    const modelConfig = this.getModelConfig(selectedModel.vendor);
-
-    try {
-      const newModelInstance = new selectedModel.AIConstructor({
-        ...modelConfig,
-      });
-
-      // Set the new model
-      ChatModelManager.chatModel = newModelInstance;
-    } catch (error) {
-      console.error(error);
-      new Notice(`Error creating model: ${modelDisplayName}`);
-    }
-  }
-
-  validateChatModel(chatModel: BaseChatModel): boolean {
-    if (chatModel === undefined || chatModel === null) {
-      return false;
-    }
-    return true
-  }
-
-  async countTokens(inputStr: string): Promise<number> {
-    return ChatModelManager.chatModel.getNumTokens(inputStr);
   }
 }

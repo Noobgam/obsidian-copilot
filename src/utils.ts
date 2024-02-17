@@ -54,11 +54,12 @@ export async function getTagsFromNote(
 }
 
 export async function getTagsFromContent(fileContent: string) {
-  let allTags: string[] = []
+  let allTags: string[] = [];
   if (fileContent.startsWith('---')) {
     const endOfYaml = fileContent.indexOf('---', 3);
     if (endOfYaml != -1) {
-      const noteProperties = parseYaml(fileContent.substring(4, endOfYaml)) || {};
+      const noteProperties =
+        parseYaml(fileContent.substring(4, endOfYaml)) || {};
       const noteTags = noteProperties.tags || [];
       allTags = [...allTags, ...noteTags];
     }
@@ -104,7 +105,7 @@ export async function getNotesFromTags(
 
   for (const file of files) {
     const noteTags = await getTagsFromNote(file, vault);
-    if (tags.some(tag => noteTags.includes(tag))) {
+    if (tags.some((tag) => noteTags.includes(tag))) {
       filesWithTag.push(file);
     }
   }
