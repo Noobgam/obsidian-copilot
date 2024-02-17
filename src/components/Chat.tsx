@@ -5,11 +5,15 @@ import ChatIcons from '@/components/ChatComponents/ChatIcons';
 import ChatInput from '@/components/ChatComponents/ChatInput';
 import ChatMessages from '@/components/ChatComponents/ChatMessages';
 import { AI_SENDER, USER_SENDER } from '@/constants';
-import { AppContext } from '@/context';
+import { AppContext, ChatSharedContext } from '@/context';
 import { CustomPromptProcessor } from '@/customPromptProcessor';
-import { getAIResponse } from '@/langchainStream';
+import { getAIResponse, GetAiResponseOptions } from '@/langchainStream';
 import { CopilotSettings } from '@/settings/SettingsPage';
-import SharedState, { ChatMessage, useSharedState } from '@/sharedState';
+import SharedState, {
+  ChatMessage,
+  generateMessageId,
+  useSharedState,
+} from '@/sharedState';
 import {
   createChangeToneSelectionPrompt,
   createTranslateSelectionPrompt,
@@ -36,7 +40,7 @@ import {
 import VectorDBManager from '@/vectorDBManager';
 import { EventEmitter } from 'events';
 import { Notice, TFile, Vault } from 'obsidian';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
   ChatContext,
   combineChatContext,
@@ -73,8 +77,14 @@ const Chat: React.FC<ChatProps> = ({
   debug,
 }) => {
   const [chatHistory, addMessage, clearMessages] = useSharedState(sharedState);
-  const [currentModel, setModel, currentChain, setChain, clearChatMemory] =
-    useAIState(chainManager);
+  const [
+    currentModel,
+    setModel,
+    currentChain,
+    setChain,
+    addChatMessage,
+    clearChatMemory,
+  ] = useAIState(chainManager);
   const [currentAiMessage, setCurrentAiMessage] = useState('');
   const [inputMessage, setInputMessage] = useState('');
   const [abortController, setAbortController] =
@@ -84,6 +94,72 @@ const Chat: React.FC<ChatProps> = ({
     useState<ChatContext>(EMPTY_CHAT_CONTEXT);
 
   const app = useContext(AppContext);
+  const [currentlyEditedMessageId, setCurrentlyEditedMessageId] = useState<
+    string | undefined
+  >(undefined);
+
+  const launchAIResponse = useCallback(
+    async ({
+      userMessage,
+      extraOptions,
+    }: {
+      userMessage: ChatMessage;
+      extraOptions?: Partial<GetAiResponseOptions>;
+    }) => {
+      setLoading(true);
+      await getAIResponse(
+        userMessage,
+        chainManager,
+        addMessage,
+        setCurrentAiMessage,
+        setAbortController,
+        {
+          debug,
+          ...(extraOptions ? extraOptions : {}),
+        }
+      );
+      setLoading(false);
+    },
+    [
+      chainManager,
+      setLoading,
+      addMessage,
+      setCurrentAiMessage,
+      setAbortController,
+      debug,
+    ]
+  );
+
+  const editMessage = useCallback(
+    async (message: ChatMessage) => {
+      // invalidates everything that happened past that message in conv
+      const idx = chatHistory.findIndex((c) => c.id == message.id);
+      if (idx === -1) {
+        new Notice('Failed to find appropriate message');
+      }
+      const newHistory = chatHistory.slice(0, idx);
+      newHistory.push(message);
+
+      clearMessages();
+      clearChatMemory();
+      let userMessage = undefined;
+      for (const chatMessage of newHistory) {
+        // since we don't edit invisible messages, how do we deal with context?
+        addMessage(chatMessage);
+        if (chatMessage.sender === USER_SENDER) {
+          userMessage = chatMessage;
+        }
+        await addChatMessage(chatMessage);
+      }
+      if (userMessage) {
+        // intentional skip of await.
+        launchAIResponse({ userMessage });
+      } else {
+        new Notice("Couldn't find last user message");
+      }
+    },
+    [chainManager, addMessage, setCurrentAiMessage, setAbortController]
+  );
 
   const handleSendMessage = async () => {
     if (!inputMessage) return;
@@ -95,6 +171,8 @@ const Chat: React.FC<ChatProps> = ({
         message: inputMessage,
         sender: USER_SENDER,
         isVisible: true,
+        isInChain: true,
+        id: generateMessageId(),
       };
 
       addMessage(userMessage);
@@ -104,29 +182,25 @@ const Chat: React.FC<ChatProps> = ({
         inputMessage
       );
       setStoredContext(EMPTY_CHAT_CONTEXT);
-      userMessage = invisibleMessage;
+      userMessage = invisibleMessage ?? visibleMessage;
       addMessage(visibleMessage);
+      if (invisibleMessage) {
+        addMessage(invisibleMessage);
+      }
     }
 
     setInputMessage('');
 
-    setLoading(true);
-    await getAIResponse(
-      userMessage,
-      chainManager,
-      addMessage,
-      setCurrentAiMessage,
-      setAbortController,
-      { debug }
-    );
-    setLoading(false);
+    launchAIResponse({ userMessage });
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = async (
+    event: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     if (event.nativeEvent.isComposing) return;
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault(); // Prevents adding a newline to the textarea
-      handleSendMessage();
+      await handleSendMessage();
     }
   };
 
@@ -251,6 +325,8 @@ const Chat: React.FC<ChatProps> = ({
       sender: AI_SENDER,
       message: `Indexing [[${noteName}]]...\n\n Please switch to "QA" in Mode Selection to ask questions about it.`,
       isVisible: true,
+      isInChain: true,
+      id: generateMessageId(),
     };
 
     if (currentChain === ChainType.RETRIEVAL_QA_CHAIN) {
@@ -280,6 +356,8 @@ const Chat: React.FC<ChatProps> = ({
         sender: AI_SENDER,
         message: `The selected text contains ${wordCount} words and ${tokenCount} tokens.`,
         isVisible: true,
+        isInChain: true,
+        id: generateMessageId(),
       };
       addMessage(tokenCountMessage);
     }
@@ -317,11 +395,11 @@ const Chat: React.FC<ChatProps> = ({
           message: messageWithPrompt,
           sender: USER_SENDER,
           isVisible: isVisible,
+          isInChain: true,
+          id: generateMessageId(),
         };
 
-        if (isVisible) {
-          addMessage(promptMessage);
-        }
+        addMessage(promptMessage);
 
         // Have a hardcoded custom temperature for some commands that need more strictness
         chainManager.langChainParams = {
@@ -331,19 +409,10 @@ const Chat: React.FC<ChatProps> = ({
           }),
         };
 
-        setLoading(true);
-        await getAIResponse(
-          promptMessage,
-          chainManager,
-          addMessage,
-          setCurrentAiMessage,
-          setAbortController,
-          {
-            debug,
-            ignoreSystemMessage,
-          }
-        );
-        setLoading(false);
+        await launchAIResponse({
+          userMessage: promptMessage,
+          extraOptions: { ignoreSystemMessage },
+        });
       };
 
       emitter.on(eventType, handleSelection);
@@ -458,39 +527,49 @@ const Chat: React.FC<ChatProps> = ({
   );
 
   return (
-    <div className="chat-container">
-      <ChatMessages
-        chatHistory={chatHistory}
-        currentAiMessage={currentAiMessage}
-        loading={loading}
-      />
-      <div className="bottom-container">
-        <ChatIcons
-          currentModel={currentModel}
-          setCurrentModel={setModel}
-          currentChain={currentChain}
-          setCurrentChain={setChain}
-          onStopGenerating={handleStopGenerating}
-          onNewChat={() => {
-            clearMessages();
-            clearChatMemory();
-            clearCurrentAiMessage();
-          }}
-          onSaveAsNote={handleSaveAsNote}
-          onSendActiveNoteToPrompt={handleSendActiveNoteToPrompt}
-          onForceRebuildActiveNoteContext={forceRebuildActiveNoteContext}
-          addMessage={addMessage}
-          vault={vault}
+    <ChatSharedContext.Provider
+      value={{
+        currentlyEditedMessageId: currentlyEditedMessageId,
+        setCurrentlyEditedMessageId: setCurrentlyEditedMessageId,
+        addMessage: addMessage,
+        editMessage: editMessage,
+        clearMessages: clearMessages,
+      }}
+    >
+      <div className="chat-container">
+        <ChatMessages
+          chatHistory={chatHistory}
+          currentAiMessage={currentAiMessage}
+          loading={loading}
         />
-        <ChatInput
-          inputMessage={inputMessage}
-          setInputMessage={setInputMessage}
-          handleSendMessage={handleSendMessage}
-          handleKeyDown={handleKeyDown}
-          getChatVisibility={getChatVisibility}
-        />
+        <div className="bottom-container">
+          <ChatIcons
+            currentModel={currentModel}
+            setCurrentModel={setModel}
+            currentChain={currentChain}
+            setCurrentChain={setChain}
+            onStopGenerating={handleStopGenerating}
+            onNewChat={() => {
+              clearMessages();
+              clearChatMemory();
+              clearCurrentAiMessage();
+            }}
+            onSaveAsNote={handleSaveAsNote}
+            onSendActiveNoteToPrompt={handleSendActiveNoteToPrompt}
+            onForceRebuildActiveNoteContext={forceRebuildActiveNoteContext}
+            addMessage={addMessage}
+            vault={vault}
+          />
+          <ChatInput
+            inputMessage={inputMessage}
+            setInputMessage={setInputMessage}
+            handleSendMessage={handleSendMessage}
+            handleKeyDown={handleKeyDown}
+            getChatVisibility={getChatVisibility}
+          />
+        </div>
       </div>
-    </div>
+    </ChatSharedContext.Provider>
   );
 };
 

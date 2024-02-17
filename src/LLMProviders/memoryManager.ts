@@ -20,9 +20,9 @@ export default class MemoryManager {
     return this.memory;
   }
 
-  clearChatMemory(): void {
+  async clearChatMemory(): Promise<void> {
     console.log('clearing chat memory');
-    this.memory.clear();
+    await this.memory.clear();
   }
 
   private initMemory(): void {

@@ -1,6 +1,6 @@
 import { SetChainOptions } from '@/aiParams';
 import { AI_SENDER, ChatModelDisplayNames } from '@/constants';
-import { ChatMessage } from '@/sharedState';
+import { ChatMessage, generateMessageId } from '@/sharedState';
 import { getFileContent, getFileName, stringToChainType } from '@/utils';
 import { Notice, Vault } from 'obsidian';
 import React, { useEffect, useState } from 'react';
@@ -78,6 +78,8 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
         sender: AI_SENDER,
         message: `OK Feel free to ask me questions about [[${noteName}]]. \n\nPlease note that this is a retrieval-based QA for notes longer than the model context window. Specific questions are encouraged. For generic questions like 'give me a summary', 'brainstorm based on the content', Chat mode with *Send Note to Prompt* button used with a *long context model* is a more suitable choice. \n\n(This mode will be upgraded to work on the entire vault next)`,
         isVisible: true,
+        isInChain: true,
+        id: generateMessageId(),
       };
       addMessage(activeNoteOnMessage);
       if (noteContent) {

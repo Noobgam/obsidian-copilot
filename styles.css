@@ -249,7 +249,7 @@ If your plugin does not need CSS, delete this file.
   margin-top: 0; /* Adjust this value to align the pseudo-element vertically */
 }
 
-.copy-message-button {
+.chat-message-button {
   width: 24px;
   height: 24px;
   padding: 4px;

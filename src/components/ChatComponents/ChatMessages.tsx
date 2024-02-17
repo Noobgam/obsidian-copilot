@@ -44,9 +44,9 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   return (
     <div className="chat-messages">
       {chatHistory.map(
-        (message, index) =>
+        (message) =>
           message.isVisible && (
-            <ChatSingleMessage key={index} message={message} />
+            <ChatSingleMessage key={message.id} message={message} />
           )
       )}
       {currentAiMessage ? (

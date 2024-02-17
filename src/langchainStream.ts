@@ -4,6 +4,12 @@ import { Notice } from 'obsidian';
 
 export type Role = 'assistant' | 'user' | 'system';
 
+export type GetAiResponseOptions = {
+  debug?: boolean;
+  ignoreSystemMessage?: boolean;
+  updateLoading?: (loading: boolean) => void;
+};
+
 export const getAIResponse = async (
   userMessage: ChatMessage,
   chainManager: ChainManager,

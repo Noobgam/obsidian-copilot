@@ -14,6 +14,7 @@ This is not acceptable for any OSS, thus the necessity for a hardfork.
 
 - Supports actual chat with prompt by stuffing the prompt into
 - Correct tag detection (does not detect tags defined by hashtag in upstream for whatever reason)
+- There is an option to edit existing messages, that will reprompt LLM without losing previous context. (contexted messages cannot be edited for now)
 
 # Roadmap:
 
