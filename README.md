@@ -31,5 +31,6 @@ For now the plugin is not published to obsidian community. This will be done lat
 - [x] Add dumb configurable context (tags)
 - [ ] Get familiar with the code
 - [ ] Get a major refactoring in (rm singletons, extract classes, reactify the bad code)
+- [ ] Make the repo indexing opt-in
 - [ ] Create agent mode for context
 - [ ] Register obsidian-commands for agent mode (read documents by path list)
