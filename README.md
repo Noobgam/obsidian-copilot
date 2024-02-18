@@ -17,7 +17,7 @@ For now the plugin is not published to obsidian community. This will be done lat
 * Pick the release you want to install
 * Download `copilot.zip`
 * Open obsidian → Settings → Community Plugins → Installed Plugins → Press on the explorer button
-* Unpack the `copilot.zip` in a new directory, for examplae named `copilot`
+* Unpack the `copilot.zip` in a new directory, for example named `copilot`
 * Press the reload button in the obsidian
 
 # Main differences for now:
