@@ -87,6 +87,8 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
       }
     };
 
+    // intentional skip of await.
+    // eslint-disable-next-line  @typescript-eslint/no-floating-promises
     handleRetrievalQAChain();
   }, [selectedChain]);
 

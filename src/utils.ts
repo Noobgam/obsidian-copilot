@@ -68,7 +68,7 @@ export async function getTagsFromContent(fileContent: string) {
   // Obsidian recognizes any alphanumeric sequence as well
   // see the tests for the examples of tags that I have found obsidian to recognize
   // keep in mind that in ui terms obsidian will also not recognize the tag '123' even if you put it into properties
-  const regex = /#([\p{L}\p{Nd}_\-]*\p{L}[\p{L}\p{Nd}_\-]*)\b/gu;
+  const regex = /#([\p{L}\p{Nd}_-]*\p{L}[\p{L}\p{Nd}_-]*)\b/gu;
   const regexTagMatches = fileContent.match(regex) || [];
 
   return [...allTags, ...regexTagMatches].map(cleanTag);

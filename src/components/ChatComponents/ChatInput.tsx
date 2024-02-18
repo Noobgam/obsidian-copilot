@@ -42,6 +42,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       const visibility = await getChatVisibility();
       setShouldFocus(visibility);
     };
+    // eslint-disable-next-line  @typescript-eslint/no-floating-promises
     fetchChatVisibility();
   }, [getChatVisibility]);
 

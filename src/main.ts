@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-floating-promises */
 import ChainManager from '@/LLMProviders/chainManager';
 import { LangChainParams, SetChainOptions } from '@/aiParams';
 import { ChainType } from '@/chainFactory';
@@ -42,7 +43,7 @@ export default class CopilotPlugin extends Plugin {
     // Always have one instance of sharedState and chainManager in the plugin
     this.sharedState = new SharedState();
     const langChainParams = this.getChainManagerParams();
-    this.chainManager = new ChainManager(langChainParams);
+    this.chainManager = await ChainManager.prototype.create(langChainParams);
 
     this.dbPrompts = new PouchDB<CustomPrompt>('copilot_custom_prompts');
 
@@ -52,7 +53,7 @@ export default class CopilotPlugin extends Plugin {
 
     VectorDBManager.initializeDB(this.dbVectorStores);
     // Remove documents older than TTL days on load
-    VectorDBManager.removeOldDocuments(
+    await VectorDBManager.removeOldDocuments(
       this.settings.ttlDays * 24 * 60 * 60 * 1000
     );
 
@@ -72,8 +73,8 @@ export default class CopilotPlugin extends Plugin {
     this.addCommand({
       id: 'chat-toggle-window-note-area',
       name: 'Toggle Copilot Chat Window in Note Area',
-      callback: () => {
-        this.toggleViewNoteArea();
+      callback: async () => {
+        await this.toggleViewNoteArea();
       },
     });
 

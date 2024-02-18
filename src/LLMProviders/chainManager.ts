@@ -35,19 +35,26 @@ export default class ChainManager {
   private promptManager: PromptManager;
   private embeddingsManager: EmbeddingsManager;
 
+  private constructor(langChainParams: LangChainParams) {
+    // Instantiate singletons
+    this.langChainParams = langChainParams;
+    this.memoryManager = MemoryManager.getInstance(this.langChainParams);
+    this.chatModelManager = ChatModelManager.getInstance(this.langChainParams);
+    this.promptManager = PromptManager.getInstance(this.langChainParams);
+  }
+
   /**
    * Constructor for initializing langChainParams and instantiating singletons.
    *
    * @param {LangChainParams} langChainParams - the parameters for language chaining
    * @return {void}
    */
-  constructor(langChainParams: LangChainParams) {
-    // Instantiate singletons
-    this.langChainParams = langChainParams;
-    this.memoryManager = MemoryManager.getInstance(this.langChainParams);
-    this.chatModelManager = ChatModelManager.getInstance(this.langChainParams);
-    this.promptManager = PromptManager.getInstance(this.langChainParams);
-    this.createChainWithNewModel(this.langChainParams.modelDisplayName);
+  async create(langChainParams: LangChainParams): Promise<ChainManager> {
+    const chainManager = new ChainManager(langChainParams);
+    await chainManager.createChainWithNewModel(
+      this.langChainParams.modelDisplayName
+    );
+    return chainManager;
   }
 
   /**
@@ -57,7 +64,7 @@ export default class ChainManager {
    * @param {string} newModelDisplayName - the display name of the new model in the dropdown
    * @return {void}
    */
-  createChainWithNewModel(newModelDisplayName: string): void {
+  async createChainWithNewModel(newModelDisplayName: string): Promise<void> {
     ChainManager.isOllamaModelActive =
       newModelDisplayName === ChatModelDisplayNames.OLLAMA;
     ChainManager.isOpenRouterModelActive =
@@ -84,7 +91,7 @@ export default class ChainManager {
       // Must update the chatModel for chain because ChainFactory always
       // retrieves the old chain without the chatModel change if it exists!
       // Create a new chain with the new chatModel
-      this.createChain(this.langChainParams.chainType, {
+      await this.createChain(this.langChainParams.chainType, {
         ...this.langChainParams.options,
         forceNewCreation: true,
       });
@@ -96,10 +103,13 @@ export default class ChainManager {
   }
 
   /* Create a new chain, or update chain with new model */
-  createChain(chainType: ChainType, options?: SetChainOptions): void {
+  async createChain(
+    chainType: ChainType,
+    options?: SetChainOptions
+  ): Promise<void> {
     this.validateChainType(chainType);
     try {
-      this.setChain(chainType, options);
+      await this.setChain(chainType, options);
     } catch (error) {
       new Notice('Error creating chain:', error);
       console.error('Error creating chain:', error);
@@ -261,7 +271,7 @@ export default class ChainManager {
         'Chain is not initialized properly, re-initializing chain: ',
         this.langChainParams.chainType
       );
-      this.setChain(
+      await this.setChain(
         this.langChainParams.chainType,
         this.langChainParams.options
       );
@@ -287,12 +297,12 @@ export default class ChainManager {
           ])
         : chatPrompt;
 
-      this.setChain(chainType, {
+      await this.setChain(chainType, {
         ...this.langChainParams.options,
         prompt: effectivePrompt,
       });
     } else {
-      this.setChain(chainType, this.langChainParams.options);
+      await this.setChain(chainType, this.langChainParams.options);
     }
 
     let fullAIResponse = '';
@@ -301,7 +311,7 @@ export default class ChainManager {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const chatStream = await ChainManager.chain.stream({
       input: userMessage,
-    } as any);
+    });
 
     try {
       switch (chainType) {
@@ -413,7 +423,10 @@ export default class ChainManager {
         embeddingsAPI
       );
       // Serialize and save vector store to PouchDB
-      VectorDBManager.setMemoryVectors(this.vectorStore.memoryVectors, docHash);
+      await VectorDBManager.setMemoryVectors(
+        this.vectorStore.memoryVectors,
+        docHash
+      );
       console.log('Vector store created successfully.');
       new Notice('Vector store created successfully.');
     } catch (error) {

@@ -46,13 +46,18 @@ const ChatSingleMessage: React.FC<ChatSingleMessageProps> = ({ message }) => {
       return;
     }
 
-    navigator.clipboard.writeText(message.message).then(() => {
-      setIsCopied(true);
+    navigator.clipboard
+      .writeText(message.message)
+      .then(() => {
+        setIsCopied(true);
 
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    });
+        setTimeout(() => {
+          setIsCopied(false);
+        }, 2000);
+      })
+      .catch((x) => {
+        console.log(`Could not copy to clipboard: ${x}`);
+      });
   };
 
   const messageIsEditedNow =
