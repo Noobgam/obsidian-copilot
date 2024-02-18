@@ -153,6 +153,7 @@ const Chat: React.FC<ChatProps> = ({
       }
       if (userMessage) {
         // intentional skip of await.
+        // eslint-disable-next-line  @typescript-eslint/no-floating-promises
         launchAIResponse({ userMessage });
       } else {
         new Notice("Couldn't find last user message");
@@ -191,6 +192,8 @@ const Chat: React.FC<ChatProps> = ({
 
     setInputMessage('');
 
+    // intentional skip of await.
+    // eslint-disable-next-line  @typescript-eslint/no-floating-promises
     launchAIResponse({ userMessage });
   };
 
@@ -225,7 +228,7 @@ const Chat: React.FC<ChatProps> = ({
       const noteFileName = `${defaultSaveFolder}/Chat-${formatDateTime(now)}.md`;
       const newNote: TFile = await app.vault.create(noteFileName, chatContent);
       const leaf = app.workspace.getLeaf();
-      leaf.openFile(newNote);
+      await leaf.openFile(newNote);
     } catch (error) {
       console.error('Error saving chat as note:', error);
     }

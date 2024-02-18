@@ -1,8 +1,7 @@
 import ChainManager from '@/LLMProviders/chainManager';
 import { SetChainOptions } from '@/aiParams';
 import { ChainType } from '@/chainFactory';
-import { BaseChatMemory, BufferWindowMemory } from 'langchain/memory';
-import { memo, useState } from 'react';
+import { useState } from 'react';
 import { ChatMessage } from '@/sharedState';
 import { USER_SENDER } from '@/constants';
 
@@ -44,13 +43,13 @@ export function useAIState(
     await chainManager.memoryManager.clearChatMemory();
   };
 
-  const setModel = (newModelDisplayName: string) => {
-    chainManager.createChainWithNewModel(newModelDisplayName);
+  const setModel = async (newModelDisplayName: string) => {
+    await chainManager.createChainWithNewModel(newModelDisplayName);
     setCurrentModel(newModelDisplayName);
   };
 
-  const setChain = (newChain: ChainType, options?: SetChainOptions) => {
-    chainManager.setChain(newChain, options);
+  const setChain = async (newChain: ChainType, options?: SetChainOptions) => {
+    await chainManager.setChain(newChain, options);
     setCurrentChain(newChain);
   };
 

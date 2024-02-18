@@ -59,13 +59,18 @@ export const CodeBlock: FC<CodeProps> = memo(({ language = 'text', value }) => {
       return;
     }
 
-    navigator.clipboard.writeText(value).then(() => {
-      setIsCopied(true);
+    navigator.clipboard
+      .writeText(value)
+      .then(() => {
+        setIsCopied(true);
 
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    });
+        setTimeout(() => {
+          setIsCopied(false);
+        }, 2000);
+      })
+      .catch((x) => {
+        console.log(`Could not copy to clipboard ${x}`);
+      });
   };
   const downloadAsFile = () => {
     const fileExtension = programmingLanguages[language] || '.file';
