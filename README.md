@@ -10,6 +10,16 @@ and [not being frugal](https://github.com/logancyang/obsidian-copilot/blob/848d2
 
 This is not acceptable for any OSS, thus the necessity for a hardfork.
 
+# Installation
+
+For now the plugin is not published to obsidian community. This will be done later.
+
+* Pick the release you want to install
+* Download `copilot.zip`
+* Open obsidian → Settings → Community Plugins → Installed Plugins → Press on the explorer button
+* Unpack the `copilot.zip` in a new directory, for examplae named `copilot`
+* Press the reload button in the obsidian
+
 # Main differences for now:
 
 - Supports actual chat with prompt by stuffing the prompt into
