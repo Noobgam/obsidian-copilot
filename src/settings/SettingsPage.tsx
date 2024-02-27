@@ -52,10 +52,9 @@ export type ApiKeySettings = {
   [K in (typeof API_KEY_SETTINGS)[number]]: string;
 };
 
-export type EncryptionSettings = { enableEncryption: boolean; } & ApiKeySettings;
+export type EncryptionSettings = { enableEncryption: boolean } & ApiKeySettings;
 
-export type CopilotSettings =
-  MainSettings &
+export type CopilotSettings = MainSettings &
   EncryptionSettings &
   ApiKeySettings &
   ChatNoteContextSettings;

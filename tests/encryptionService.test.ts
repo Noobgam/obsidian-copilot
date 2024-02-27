@@ -37,12 +37,9 @@ describe('Platform-specific Tests', () => {
   });
 });
 
-interface TestSettings extends EncryptionSettings {
-}
-
 describe('EncryptionService', () => {
   let service: EncryptionService;
-  let settings: TestSettings;
+  let settings: EncryptionSettings;
 
   beforeEach(() => {
     jest.resetModules();

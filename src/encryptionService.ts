@@ -10,7 +10,7 @@ if (Platform.isDesktop) {
   safeStorage = require('electron')?.remote?.safeStorage;
 }
 
-type EncryptionSettings = { enableEncryption: boolean; } & ApiKeySettings;
+type EncryptionSettings = { enableEncryption: boolean } & ApiKeySettings;
 
 export default class EncryptionService {
   private settings: EncryptionSettings;
