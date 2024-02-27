@@ -1,10 +1,12 @@
-import CopilotPlugin from "@/main";
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import CopilotPlugin from '@/main';
+import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
 import React from 'react';
-import { createRoot } from "react-dom/client";
-import SettingsMain from "./components/SettingsMain";
+import { createRoot } from 'react-dom/client';
+import SettingsMain from './components/SettingsMain';
 
-export interface CopilotSettings {
+export type CopilotSettings = MainSettings & ChatNoteContextSettings;
+
+interface MainSettings {
   openAIApiKey: string;
   huggingfaceApiKey: string;
   cohereApiKey: string;
@@ -35,6 +37,10 @@ export interface CopilotSettings {
   stream: boolean;
   embeddingProvider: string;
   defaultSaveFolder: string;
+  debug: boolean;
+}
+
+interface ChatNoteContextSettings {
   chatNoteContextPath: string;
   chatNoteContextTags: string[];
   debug: boolean;
@@ -56,11 +62,11 @@ export class CopilotSettingTab extends PluginSettingTab {
 
       // Reload the plugin
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const app = (this.plugin.app as any);
-      await app.plugins.disablePlugin("copilot");
-      await app.plugins.enablePlugin("copilot");
+      const app = this.plugin.app as any;
+      await app.plugins.disablePlugin('copilot');
+      await app.plugins.enablePlugin('copilot');
 
-      app.setting.openTabById("copilot").display();
+      app.setting.openTabById('copilot').display();
       new Notice('Plugin reloaded successfully.');
     } catch (error) {
       new Notice('Failed to reload the plugin. Please reload manually.');
@@ -72,14 +78,19 @@ export class CopilotSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.style.userSelect = 'text';
-    const div = containerEl.createDiv("div")
+    const div = containerEl.createDiv('div');
     const sections = createRoot(div);
 
     sections.render(
-      <SettingsMain plugin={this.plugin} reloadPlugin={this.reloadPlugin.bind(this)} />
+      <SettingsMain
+        plugin={this.plugin}
+        reloadPlugin={this.reloadPlugin.bind(this)}
+      />
     );
 
-    const devModeHeader = containerEl.createEl('h1', { text: 'Additional Settings' });
+    const devModeHeader = containerEl.createEl('h1', {
+      text: 'Additional Settings',
+    });
     devModeHeader.style.marginTop = '40px';
 
     new Setting(containerEl)
@@ -98,15 +109,16 @@ export class CopilotSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Debug mode")
+      .setName('Debug mode')
       .setDesc(
         createFragment((frag) => {
-          frag.appendText("Debug mode will log all API requests and prompts to the console.");
+          frag.appendText(
+            'Debug mode will log all API requests and prompts to the console.'
+          );
         })
       )
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.debug)
-        .onChange(async (value) => {
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.debug).onChange(async (value) => {
           this.plugin.settings.debug = value;
           await this.plugin.saveSettings();
         })

@@ -11,8 +11,8 @@ import {
 import EncryptionService from '@/encryptionService';
 import { ProxyChatOpenAI } from '@/langchainWrappers';
 import { getModelName } from '@/utils';
-import { ChatOllama } from "@langchain/community/chat_models/ollama";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOllama } from '@langchain/community/chat_models/ollama';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { BaseChatModel } from 'langchain/chat_models/base';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Notice } from 'obsidian';
@@ -21,7 +21,6 @@ export default class ChatModelManager {
   private encryptionService: EncryptionService;
   private static instance: ChatModelManager;
   private static chatModel: BaseChatModel;
-  private static chatOpenAI: ChatOpenAI;
   private static modelMap: Record<
     string,
     {
@@ -48,6 +47,51 @@ export default class ChatModelManager {
       ChatModelManager.instance = new ChatModelManager(langChainParams, encryptionService);
     }
     return ChatModelManager.instance;
+  }
+
+  getChatModel(): BaseChatModel {
+    return ChatModelManager.chatModel;
+  }
+
+  setChatModel(modelDisplayName: string): void {
+    if (!ChatModelManager.modelMap.hasOwnProperty(modelDisplayName)) {
+      throw new Error(`No model found for: ${modelDisplayName}`);
+    }
+
+    // MUST update it since chatModelManager is a singleton.
+    this.langChainParams.model = getModelName(modelDisplayName);
+
+    // Create and return the appropriate model
+    const selectedModel = ChatModelManager.modelMap[modelDisplayName];
+    if (!selectedModel.hasApiKey) {
+      const errorMessage = `API key is not provided for the model: ${modelDisplayName}. Model switch failed.`;
+      new Notice(errorMessage);
+      // Stop execution and deliberate fail the model switch
+      throw new Error(errorMessage);
+    }
+
+    const modelConfig = this.getModelConfig(selectedModel.vendor);
+
+    try {
+      // Set the new model
+      ChatModelManager.chatModel = new selectedModel.AIConstructor({
+        ...modelConfig,
+      });
+    } catch (error) {
+      console.error(error);
+      new Notice(`Error creating model: ${modelDisplayName}`);
+    }
+  }
+
+  validateChatModel(chatModel: BaseChatModel): boolean {
+    if (chatModel === undefined || chatModel === null) {
+      return false;
+    }
+    return true;
+  }
+
+  async countTokens(inputStr: string): Promise<number> {
+    return ChatModelManager.chatModel.getNumTokens(inputStr);
   }
 
   private getModelConfig(chatModelProvider: string): ModelConfig {
@@ -96,7 +140,11 @@ export default class ChatModelManager {
       },
     };
 
-    return { ...baseConfig, ...(providerConfig[chatModelProvider as keyof typeof providerConfig] || {}) };
+    return {
+      ...baseConfig,
+      ...(providerConfig[chatModelProvider as keyof typeof providerConfig] ||
+        {}),
+    };
   }
 
   private buildModelMap() {
@@ -104,7 +152,8 @@ export default class ChatModelManager {
     const modelMap = ChatModelManager.modelMap;
 
     const OpenAIChatModel = this.langChainParams.openAIProxyBaseUrl
-      ? ProxyChatOpenAI : ChatOpenAI;
+      ? ProxyChatOpenAI
+      : ChatOpenAI;
 
     const modelConfigurations = [
       {
@@ -146,7 +195,7 @@ export default class ChatModelManager {
     ];
 
     modelConfigurations.forEach(({ models, apiKey, constructor, vendor }) => {
-      models.forEach(modelDisplayNameKey => {
+      models.forEach((modelDisplayNameKey) => {
         modelMap[modelDisplayNameKey] = {
           hasApiKey: Boolean(apiKey),
           AIConstructor: constructor,
@@ -154,51 +203,5 @@ export default class ChatModelManager {
         };
       });
     });
-  }
-
-  getChatModel(): BaseChatModel {
-    return ChatModelManager.chatModel;
-  }
-
-  setChatModel(modelDisplayName: string): void {
-    if (!ChatModelManager.modelMap.hasOwnProperty(modelDisplayName)) {
-      throw new Error(`No model found for: ${modelDisplayName}`);
-    }
-    // MUST update it since chatModelManager is a singleton.
-    this.langChainParams.model = getModelName(modelDisplayName);
-
-    // Create and return the appropriate model
-    const selectedModel = ChatModelManager.modelMap[modelDisplayName];
-    if (!selectedModel.hasApiKey) {
-      const errorMessage = `API key is not provided for the model: ${modelDisplayName}. Model switch failed.`;
-      new Notice(errorMessage);
-      // Stop execution and deliberate fail the model switch
-      throw new Error(errorMessage);
-    }
-
-    const modelConfig = this.getModelConfig(selectedModel.vendor);
-
-    try {
-      const newModelInstance = new selectedModel.AIConstructor({
-        ...modelConfig,
-      });
-
-      // Set the new model
-      ChatModelManager.chatModel = newModelInstance;
-    } catch (error) {
-      console.error(error);
-      new Notice(`Error creating model: ${modelDisplayName}`);
-    }
-  }
-
-  validateChatModel(chatModel: BaseChatModel): boolean {
-    if (chatModel === undefined || chatModel === null) {
-      return false;
-    }
-    return true
-  }
-
-  async countTokens(inputStr: string): Promise<number> {
-    return ChatModelManager.chatModel.getNumTokens(inputStr);
   }
 }

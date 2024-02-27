@@ -1,26 +1,23 @@
-import ChainManager from "@/LLMProviders/chainManager";
-import { LangChainParams, SetChainOptions } from "@/aiParams";
-import { ChainType } from "@/chainFactory";
+/* eslint-disable  @typescript-eslint/no-floating-promises */
+import ChainManager from '@/LLMProviders/chainManager';
+import { LangChainParams, SetChainOptions } from '@/aiParams';
+import { ChainType } from '@/chainFactory';
+import { AddPromptModal } from '@/components/AddPromptModal';
+import { AdhocPromptModal } from '@/components/AdhocPromptModal';
+import { ChatNoteContextModal } from '@/components/ChatNoteContextModal';
+import CopilotView from '@/components/CopilotView';
+import { ListPromptModal } from '@/components/ListPromptModal';
+import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT } from '@/constants';
+import { CustomPrompt } from '@/customPromptProcessor';
+import EncryptionService from '@/encryptionService';
+import { CopilotSettings, CopilotSettingTab } from '@/settings/SettingsPage';
+import SharedState from '@/sharedState';
 import { registerBuiltInCommands } from "@/commands";
-import { AddPromptModal } from "@/components/AddPromptModal";
-import { AdhocPromptModal } from "@/components/AdhocPromptModal";
-import { ChatNoteContextModal } from "@/components/ChatNoteContextModal";
-import CopilotView from "@/components/CopilotView";
-import { ListPromptModal } from "@/components/ListPromptModal";
-import {
-  CHAT_VIEWTYPE,
-  DEFAULT_SETTINGS,
-  DEFAULT_SYSTEM_PROMPT,
-} from "@/constants";
-import { CustomPrompt } from "@/customPromptProcessor";
-import EncryptionService from "@/encryptionService";
-import { CopilotSettingTab, CopilotSettings } from "@/settings/SettingsPage";
-import SharedState from "@/sharedState";
-import { sanitizeSettings } from "@/utils";
-import VectorDBManager, { VectorStoreDocument } from "@/vectorDBManager";
-import { Server } from "http";
-import { Editor, Notice, Plugin, WorkspaceLeaf } from "obsidian";
-import PouchDB from "pouchdb";
+import { sanitizeSettings } from '@/utils';
+import VectorDBManager, { VectorStoreDocument } from '@/vectorDBManager';
+import { Server } from 'http';
+import { Editor, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
+import PouchDB from 'pouchdb';
 
 export default class CopilotPlugin extends Plugin {
   settings: CopilotSettings;
@@ -44,7 +41,7 @@ export default class CopilotPlugin extends Plugin {
     this.sharedState = new SharedState();
     const langChainParams = this.getChainManagerParams();
     this.encryptionService = new EncryptionService(this.settings);
-    this.chainManager = new ChainManager(
+    this.chainManager = await ChainManager.prototype.create(
       langChainParams,
       this.encryptionService
     );
@@ -61,7 +58,7 @@ export default class CopilotPlugin extends Plugin {
 
     VectorDBManager.initializeDB(this.dbVectorStores);
     // Remove documents older than TTL days on load
-    VectorDBManager.removeOldDocuments(
+    await VectorDBManager.removeOldDocuments(
       this.settings.ttlDays * 24 * 60 * 60 * 1000
     );
 
@@ -81,8 +78,8 @@ export default class CopilotPlugin extends Plugin {
     this.addCommand({
       id: "chat-toggle-window-note-area",
       name: "Toggle Copilot Chat Window in Note Area",
-      callback: () => {
-        this.toggleViewNoteArea();
+      callback: async () => {
+        await this.toggleViewNoteArea();
       },
     });
 
@@ -99,7 +96,10 @@ export default class CopilotPlugin extends Plugin {
         new AddPromptModal(this.app, async (title: string, prompt: string) => {
           try {
             // Save the prompt to the database
-            await this.dbPrompts.put({ _id: title, prompt: prompt });
+            await this.dbPrompts.put({
+              _id: title,
+              prompt: prompt,
+            });
             new Notice("Custom prompt saved successfully.");
           } catch (e) {
             new Notice(
@@ -300,7 +300,7 @@ export default class CopilotPlugin extends Plugin {
             "Local vector store cleared successfully, new instance created."
           );
         } catch (err) {
-          console.error("Error clearing the local vector store:", err);
+          console.error('Error clearing the local vector store:', err);
           new Notice(
             "An error occurred while clearing the local vector store."
           );

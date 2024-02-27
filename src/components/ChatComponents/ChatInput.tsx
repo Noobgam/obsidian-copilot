@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-
 interface ChatInputProps {
   inputMessage: string;
   setInputMessage: (message: string) => void;
@@ -10,7 +9,11 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
-  inputMessage, setInputMessage, handleKeyDown, handleSendMessage, getChatVisibility,
+  inputMessage,
+  setInputMessage,
+  handleKeyDown,
+  handleSendMessage,
+  getChatVisibility,
 }) => {
   const [rows, setRows] = useState(1);
   const [shouldFocus, setShouldFocus] = useState(false);
@@ -27,7 +30,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const minRows = 1;
 
     const rowsNeeded = Math.min(
-      Math.max(text.split('\n').length, minRows), Math.floor(maxHeight / lineHeight)
+      Math.max(text.split('\n').length, minRows),
+      Math.floor(maxHeight / lineHeight)
     );
     setRows(rowsNeeded);
   };
@@ -38,6 +42,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       const visibility = await getChatVisibility();
       setShouldFocus(visibility);
     };
+    // eslint-disable-next-line  @typescript-eslint/no-floating-promises
     fetchChatVisibility();
   }, [getChatVisibility]);
 
@@ -65,4 +70,3 @@ const ChatInput: React.FC<ChatInputProps> = ({
 };
 
 export default ChatInput;
-

@@ -4,8 +4,8 @@ import {
   getNotesFromPath,
   getNotesFromTags,
   processVariableNameForNotePath,
-} from "@/utils";
-import { Notice, Vault } from "obsidian";
+} from '@/utils';
+import { Notice, Vault } from 'obsidian';
 
 export interface CustomPrompt {
   _id: string;
@@ -14,8 +14,9 @@ export interface CustomPrompt {
 }
 
 export class CustomPromptProcessor {
-  private vault: Vault;
   private static instance: CustomPromptProcessor | null = null;
+  private vault: Vault;
+
   private constructor(vault: Vault) {
     this.vault = vault;
   }
@@ -30,7 +31,6 @@ export class CustomPromptProcessor {
   /**
    * Extract variables and get their content.
    *
-   * @param {CustomPrompt} doc - the custom prompt to process
    * @return {Promise<string[]>} the processed custom prompt
    */
   async extractVariablesFromPrompt(customPrompt: string): Promise<string[]> {
@@ -42,11 +42,11 @@ export class CustomPromptProcessor {
       const variableName = match[1].trim();
       const notes = [];
 
-      if (variableName.startsWith("#")) {
+      if (variableName.startsWith('#')) {
         // Handle tag-based variable for multiple tags
         const tagNames = variableName
           .slice(1)
-          .split(",")
+          .split(',')
           .map((tag) => tag.trim());
         const noteFiles = await getNotesFromTags(this.vault, tagNames);
         for (const file of noteFiles) {
@@ -86,16 +86,15 @@ export class CustomPromptProcessor {
     customPrompt: string,
     selectedText: string
   ): Promise<string> {
-    const variablesWithContent = await this.extractVariablesFromPrompt(
-      customPrompt
-    );
+    const variablesWithContent =
+      await this.extractVariablesFromPrompt(customPrompt);
     let processedPrompt = customPrompt;
     const matches = [...processedPrompt.matchAll(/\{([^}]+)\}/g)];
 
-    let additionalInfo = "";
-    if (processedPrompt.includes("{}")) {
+    let additionalInfo = '';
+    if (processedPrompt.includes('{}')) {
       // Replace {} with {selectedText}
-      processedPrompt = processedPrompt.replace(/\{\}/g, "{selectedText}");
+      processedPrompt = processedPrompt.replace(/\{\}/g, '{selectedText}');
       additionalInfo += `selectedText:\n\n ${selectedText}`;
     }
 

@@ -31,15 +31,18 @@ const QASettings: React.FC<QASettingsProps> = ({
 }) => {
   return (
     <div>
-      <br/>
-      <br/>
+      <br />
+      <br />
       <h1>QA Settings</h1>
       <div className="warning-message">
         YOU MUST REBUILD YOUR INDEX AFTER SWITCHING EMBEDDING PROVIDERS!
       </div>
-      <p>QA mode relies a <em>local</em> vector index (experimental)
+      <p>
+        QA mode relies a <em>local</em> vector index (experimental)
         <br />
-        OpenAI embeddings currently has the best retrieval quality. CohereAI embeddings are free during trial and are decent. With Huggingface Inference API, your mileage may vary.
+        OpenAI embeddings currently has the best retrieval quality. CohereAI
+        embeddings are free during trial and are decent. With Huggingface
+        Inference API, your mileage may vary.
       </p>
       <DropdownComponent
         name="Embedding Provider"

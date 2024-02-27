@@ -1,23 +1,28 @@
 import { LangChainParams } from '@/aiParams';
-import { BaseChatMemory, BufferWindowMemory } from "langchain/memory";
+import { BaseChatMemory, BufferWindowMemory } from 'langchain/memory';
 
 export default class MemoryManager {
   private static instance: MemoryManager;
   private memory: BaseChatMemory;
 
-  private constructor(
-    private langChainParams: LangChainParams
-  ) {
+  private constructor(private langChainParams: LangChainParams) {
     this.initMemory();
   }
 
-  static getInstance(
-    langChainParams: LangChainParams
-  ): MemoryManager {
+  static getInstance(langChainParams: LangChainParams): MemoryManager {
     if (!MemoryManager.instance) {
       MemoryManager.instance = new MemoryManager(langChainParams);
     }
     return MemoryManager.instance;
+  }
+
+  getMemory(): BaseChatMemory {
+    return this.memory;
+  }
+
+  async clearChatMemory(): Promise<void> {
+    console.log('clearing chat memory');
+    await this.memory.clear();
   }
 
   private initMemory(): void {
@@ -28,14 +33,4 @@ export default class MemoryManager {
       returnMessages: true,
     });
   }
-
-  getMemory(): BaseChatMemory {
-    return this.memory;
-  }
-
-  clearChatMemory(): void {
-    console.log('clearing chat memory');
-    this.memory.clear();
-  }
-
 }

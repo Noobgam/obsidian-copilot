@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
+import { ALL_SENDERS } from '@/constants';
+import { v4 } from 'uuid';
 
 export interface ChatMessage {
   message: string;
-  sender: string;
+  sender: ALL_SENDERS;
   isVisible: boolean;
+  isInChain: boolean;
+  // for now the id is just a local, to be able to distinguish between them
+  id: string;
+}
+
+export function generateMessageId() {
+  return v4();
 }
 
 class SharedState {
@@ -24,11 +33,7 @@ class SharedState {
 
 export function useSharedState(
   sharedState: SharedState
-): [
-  ChatMessage[],
-  (message: ChatMessage) => void,
-  () => void
-] {
+): [ChatMessage[], (message: ChatMessage) => void, () => void] {
   // Initializes the local chatHistory state with the current
   // sharedState chatHistory using the useState hook
   // setChatHistory is used to update the *local* state
@@ -48,6 +53,7 @@ export function useSharedState(
 
   const addMessage = (message: ChatMessage) => {
     sharedState.addMessage(message);
+    console.log(`Adding message: ${JSON.stringify(message)}`);
     setChatHistory([...sharedState.getMessages()]);
   };
 
@@ -56,11 +62,7 @@ export function useSharedState(
     setChatHistory([]);
   };
 
-  return [
-    chatHistory,
-    addMessage,
-    clearMessages,
-  ];
+  return [chatHistory, addMessage, clearMessages];
 }
 
 export default SharedState;

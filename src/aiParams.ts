@@ -1,27 +1,27 @@
 import { ChainType } from '@/chainFactory';
-import { ChatPromptTemplate } from "langchain/prompts";
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export interface ModelConfig {
-  modelName: string,
-  temperature: number,
-  streaming: boolean,
-  maxRetries: number,
-  maxConcurrency: number,
-  maxTokens?: number,
-  openAIApiKey?: string,
-  anthropicApiKey?: string,
-  azureOpenAIApiKey?: string,
-  azureOpenAIApiInstanceName?: string,
-  azureOpenAIApiDeploymentName?: string,
-  azureOpenAIApiVersion?: string,
+  modelName: string;
+  temperature: number;
+  streaming: boolean;
+  maxRetries: number;
+  maxConcurrency: number;
+  maxTokens?: number;
+  openAIApiKey?: string;
+  anthropicApiKey?: string;
+  azureOpenAIApiKey?: string;
+  azureOpenAIApiInstanceName?: string;
+  azureOpenAIApiDeploymentName?: string;
+  azureOpenAIApiVersion?: string;
   // Google and TogetherAI API key share this property
-  apiKey?: string,
-  openAIProxyBaseUrl?: string,
-  ollamaModel?: string,
+  apiKey?: string;
+  openAIProxyBaseUrl?: string;
+  ollamaModel?: string;
   // OllamaBaseUrl
-  baseUrl?: string,
-  openRouterModel?: string,
-  lmStudioBaseUrl?: string,
+  baseUrl?: string;
+  openRouterModel?: string;
+  lmStudioBaseUrl?: string;
 }
 
 export interface LangChainParams {

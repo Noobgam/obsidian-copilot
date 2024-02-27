@@ -5,7 +5,6 @@ import React, { FC, memo, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
-
 interface CodeProps {
   language?: string;
   value: string;
@@ -60,23 +59,28 @@ export const CodeBlock: FC<CodeProps> = memo(({ language = 'text', value }) => {
       return;
     }
 
-    navigator.clipboard.writeText(value).then(() => {
-      setIsCopied(true);
+    navigator.clipboard
+      .writeText(value)
+      .then(() => {
+        setIsCopied(true);
 
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    });
+        setTimeout(() => {
+          setIsCopied(false);
+        }, 2000);
+      })
+      .catch((x) => {
+        console.log(`Could not copy to clipboard ${x}`);
+      });
   };
   const downloadAsFile = () => {
     const fileExtension = programmingLanguages[language] || '.file';
     const suggestedFileName = `file-${generateRandomString(
       3,
-      true,
+      true
     )}${fileExtension}`;
     const fileName = window.prompt(
       t('Enter file name') || '',
-      suggestedFileName,
+      suggestedFileName
     );
 
     if (!fileName) {
@@ -105,11 +109,7 @@ export const CodeBlock: FC<CodeProps> = memo(({ language = 'text', value }) => {
             className="flex gap-1.5 items-center rounded bg-none p-1 text-xs text-white"
             onClick={copyToClipboard}
           >
-            {isCopied ? (
-              <IconCheck size={18} />
-            ) : (
-              <IconClipboard size={18} />
-            )}
+            {isCopied ? <IconCheck size={18} /> : <IconClipboard size={18} />}
             {isCopied ? t('Copied!') : t('Copy code')}
           </button>
           <button
