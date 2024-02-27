@@ -1,4 +1,4 @@
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 
 export const CHAT_VIEWTYPE = 'copilot-chat-view';
 export const USER_SENDER = 'user';

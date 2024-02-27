@@ -3,7 +3,7 @@ import Chat from '@/components/Chat';
 import { CHAT_VIEWTYPE } from '@/constants';
 import { AppContext } from '@/context';
 import CopilotPlugin from '@/main';
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 import SharedState from '@/sharedState';
 import { EventEmitter } from 'events';
 import { ItemView, Vault, WorkspaceLeaf } from 'obsidian';

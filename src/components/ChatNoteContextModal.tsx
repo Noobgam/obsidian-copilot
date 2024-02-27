@@ -1,4 +1,4 @@
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 import { App, Modal } from 'obsidian';
 
 export class ChatNoteContextModal extends Modal {

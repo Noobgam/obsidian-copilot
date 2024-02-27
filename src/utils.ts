@@ -4,7 +4,7 @@ import {
   DISPLAY_NAME_TO_MODEL,
   USER_SENDER,
 } from '@/constants';
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 import { ChatMessage } from '@/sharedState';
 import { MemoryVariables } from '@langchain/core/memory';
 import { RunnableSequence } from '@langchain/core/runnables';

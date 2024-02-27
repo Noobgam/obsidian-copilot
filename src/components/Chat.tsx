@@ -8,7 +8,7 @@ import { AI_SENDER, USER_SENDER } from '@/constants';
 import { AppContext, ChatSharedContext } from '@/context';
 import { CustomPromptProcessor } from '@/customPromptProcessor';
 import { getAIResponse, GetAiResponseOptions } from '@/langchainStream';
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 import SharedState, {
   ChatMessage,
   generateMessageId,

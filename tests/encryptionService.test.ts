@@ -1,5 +1,5 @@
 import EncryptionService from '@/encryptionService';
-import { CopilotSettings, EncryptionSettings } from '@/settings/SettingsPage';
+import { CopilotSettings, EncryptionSettings } from '@/settings/settings';
 import { Platform } from 'obsidian';
 
 // Mocking Electron's safeStorage

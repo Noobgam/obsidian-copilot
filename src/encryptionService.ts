@@ -1,4 +1,4 @@
-import { API_KEY_SETTINGS, ApiKeySettings } from '@/settings/SettingsPage';
+import { API_KEY_SETTINGS, EncryptionSettings } from '@/settings/settings';
 import { Platform } from 'obsidian';
 
 // Dynamically import electron to access safeStorage
@@ -9,8 +9,6 @@ if (Platform.isDesktop) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   safeStorage = require('electron')?.remote?.safeStorage;
 }
-
-type EncryptionSettings = { enableEncryption: boolean } & ApiKeySettings;
 
 export default class EncryptionService {
   private settings: EncryptionSettings;

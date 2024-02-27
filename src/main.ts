@@ -14,7 +14,7 @@ import {
 } from '@/constants';
 import { CustomPrompt } from '@/customPromptProcessor';
 import EncryptionService from '@/encryptionService';
-import { CopilotSettings, CopilotSettingTab } from '@/settings/SettingsPage';
+import { CopilotSettingTab } from '@/settings/SettingsPage';
 import SharedState from '@/sharedState';
 import { registerBuiltInCommands } from '@/commands';
 import { sanitizeSettings } from '@/utils';
@@ -22,6 +22,7 @@ import VectorDBManager, { VectorStoreDocument } from '@/vectorDBManager';
 import { Server } from 'http';
 import { Editor, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
 import PouchDB from 'pouchdb';
+import { CopilotSettings } from '@/settings/settings';
 
 export default class CopilotPlugin extends Plugin {
   settings: CopilotSettings;
