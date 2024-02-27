@@ -4,44 +4,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import SettingsMain from './components/SettingsMain';
 
-export type CopilotSettings = MainSettings & ChatNoteContextSettings;
-
-interface MainSettings {
-  openAIApiKey: string;
-  huggingfaceApiKey: string;
-  cohereApiKey: string;
-  anthropicApiKey: string;
-  azureOpenAIApiKey: string;
-  azureOpenAIApiInstanceName: string;
-  azureOpenAIApiDeploymentName: string;
-  azureOpenAIApiVersion: string;
-  azureOpenAIApiEmbeddingDeploymentName: string;
-  googleApiKey: string;
-  openRouterAiApiKey: string;
-  openRouterModel: string;
-  defaultModel: string;
-  defaultModelDisplayName: string;
-  embeddingModel: string;
-  temperature: number;
-  maxTokens: number;
-  contextTurns: number;
-  userSystemPrompt: string;
-  openAIProxyBaseUrl: string;
-  ollamaModel: string;
-  ollamaBaseUrl: string;
-  lmStudioBaseUrl: string;
-  ttlDays: number;
-  stream: boolean;
-  embeddingProvider: string;
-  defaultSaveFolder: string;
-  debug: boolean;
-}
-
-interface ChatNoteContextSettings {
-  chatNoteContextPath: string;
-  chatNoteContextTags: string[];
-}
-
 export class CopilotSettingTab extends PluginSettingTab {
   plugin: CopilotPlugin;
 
@@ -84,9 +46,25 @@ export class CopilotSettingTab extends PluginSettingTab {
     );
 
     const devModeHeader = containerEl.createEl('h1', {
-      text: 'Development mode',
+      text: 'Additional Settings',
     });
     devModeHeader.style.marginTop = '40px';
+
+    new Setting(containerEl)
+      .setName('Enable Encryption')
+      .setDesc(
+        createFragment((frag) => {
+          frag.appendText('Enable encryption for the API keys.');
+        })
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableEncryption)
+          .onChange(async (value) => {
+            this.plugin.settings.enableEncryption = value;
+            await this.plugin.saveSettings();
+          })
+      );
 
     new Setting(containerEl)
       .setName('Debug mode')

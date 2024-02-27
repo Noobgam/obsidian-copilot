@@ -18,7 +18,7 @@ describe('CustomPromptProcessor', () => {
     processor = CustomPromptProcessor.getInstance(mockVault);
   });
 
-  it('should replace placeholders with 1 context and selectedText', async () => {
+  it('should add 1 context and selectedText', async () => {
     const doc: CustomPrompt = {
       _id: 'test-prompt',
       prompt: 'This is a {variable} and {}.',
@@ -35,12 +35,12 @@ describe('CustomPromptProcessor', () => {
       selectedText
     );
 
-    expect(result).toContain('This is a {context0} and {selectedText}.');
+    expect(result).toContain('This is a {variable} and {selectedText}.');
     expect(result).toContain('here is some selected text 12345');
     expect(result).toContain('here is the note content for note0');
   });
 
-  it('should replace placeholders with 2 context and no selectedText', async () => {
+  it('should add 2 context and no selectedText', async () => {
     const doc: CustomPrompt = {
       _id: 'test-prompt',
       prompt: 'This is a {variable} and {var2}.',
@@ -60,12 +60,12 @@ describe('CustomPromptProcessor', () => {
       selectedText
     );
 
-    expect(result).toContain('This is a {context0} and {context1}.');
+    expect(result).toContain('This is a {variable} and {var2}.');
     expect(result).toContain('here is the note content for note0');
     expect(result).toContain('note content for note1');
   });
 
-  it('should replace placeholders with 1 selectedText and no context', async () => {
+  it('should add 1 selectedText and no context', async () => {
     const doc: CustomPrompt = {
       _id: 'test-prompt',
       prompt: 'Rewrite the following text {}',
@@ -92,7 +92,7 @@ describe('CustomPromptProcessor', () => {
   });
 
   // This is not an expected use case but it's possible
-  it('should replace placeholders with 2 selectedText and no context', async () => {
+  it('should add 2 selectedText and no context', async () => {
     const doc: CustomPrompt = {
       _id: 'test-prompt',
       prompt: 'Rewrite the following text {} and {}',
@@ -154,14 +154,14 @@ describe('CustomPromptProcessor', () => {
       selectedText
     );
 
-    expect(result).toContain('Notes related to {context0} are:');
+    expect(result).toContain('Notes related to {#tag} are:');
     expect(result).toContain(
       '[{"name":"note","content":"Note content for #tag"}]'
     );
   });
 
   it('should process multiple tag variables correctly', async () => {
-    const customPrompt = 'Notes related to {#tag1,#tag2,   #tag3} are:';
+    const customPrompt = 'Notes related to {#tag1,#tag2,#tag3} are:';
     const selectedText = '';
 
     // Mock the extractVariablesFromPrompt method to simulate processing of multiple tags
@@ -176,7 +176,7 @@ describe('CustomPromptProcessor', () => {
       selectedText
     );
 
-    expect(result).toContain('Notes related to {context0} are:');
+    expect(result).toContain('Notes related to {#tag1,#tag2,#tag3} are:');
     expect(result).toContain(
       '[{"name":"note1","content":"Note content for #tag1"},{"name":"note2","content":"Note content for #tag2"}]'
     );

@@ -6,22 +6,23 @@ import { AddPromptModal } from '@/components/AddPromptModal';
 import { AdhocPromptModal } from '@/components/AdhocPromptModal';
 import { ChatNoteContextModal } from '@/components/ChatNoteContextModal';
 import CopilotView from '@/components/CopilotView';
-import { LanguageModal } from '@/components/LanguageModal';
 import { ListPromptModal } from '@/components/ListPromptModal';
-import { ToneModal } from '@/components/ToneModal';
 import {
   CHAT_VIEWTYPE,
   DEFAULT_SETTINGS,
   DEFAULT_SYSTEM_PROMPT,
 } from '@/constants';
 import { CustomPrompt } from '@/customPromptProcessor';
-import { CopilotSettings, CopilotSettingTab } from '@/settings/SettingsPage';
+import EncryptionService from '@/encryptionService';
+import { CopilotSettingTab } from '@/settings/SettingsPage';
 import SharedState from '@/sharedState';
+import { registerBuiltInCommands } from '@/commands';
 import { sanitizeSettings } from '@/utils';
 import VectorDBManager, { VectorStoreDocument } from '@/vectorDBManager';
 import { Server } from 'http';
 import { Editor, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
 import PouchDB from 'pouchdb';
+import { CopilotSettings } from '@/settings/settings';
 
 export default class CopilotPlugin extends Plugin {
   settings: CopilotSettings;
@@ -33,6 +34,7 @@ export default class CopilotPlugin extends Plugin {
   chatIsVisible = false;
   dbPrompts: PouchDB.Database;
   dbVectorStores: PouchDB.Database;
+  encryptionService: EncryptionService;
   server: Server | null = null;
 
   isChatVisible = () => this.chatIsVisible;
@@ -43,7 +45,15 @@ export default class CopilotPlugin extends Plugin {
     // Always have one instance of sharedState and chainManager in the plugin
     this.sharedState = new SharedState();
     const langChainParams = this.getChainManagerParams();
-    this.chainManager = await ChainManager.prototype.create(langChainParams);
+    this.encryptionService = new EncryptionService(this.settings);
+    this.chainManager = await ChainManager.create(
+      langChainParams,
+      this.encryptionService
+    );
+
+    if (this.settings.enableEncryption) {
+      await this.saveSettings();
+    }
 
     this.dbPrompts = new PouchDB<CustomPrompt>('copilot_custom_prompts');
 
@@ -82,145 +92,7 @@ export default class CopilotPlugin extends Plugin {
       this.toggleView();
     });
 
-    this.addCommand({
-      id: 'fix-grammar-prompt',
-      name: 'Fix grammar and spelling of selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'fixGrammarSpellingSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'summarize-prompt',
-      name: 'Summarize selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'summarizeSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'generate-toc-prompt',
-      name: 'Generate table of contents for selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'tocSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'generate-glossary-prompt',
-      name: 'Generate glossary for selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'glossarySelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'simplify-prompt',
-      name: 'Simplify selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'simplifySelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'emojify-prompt',
-      name: 'Emojify selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'emojifySelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'remove-urls-prompt',
-      name: 'Remove URLs from selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'removeUrlsFromSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'rewrite-tweet-prompt',
-      name: 'Rewrite selection to a tweet',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'rewriteTweetSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'rewrite-tweet-thread-prompt',
-      name: 'Rewrite selection to a tweet thread',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'rewriteTweetThreadSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'make-shorter-prompt',
-      name: 'Make selection shorter',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'rewriteShorterSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'make-longer-prompt',
-      name: 'Make selection longer',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'rewriteLongerSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'eli5-prompt',
-      name: "Explain selection like I'm 5",
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'eli5Selection');
-      },
-    });
-
-    this.addCommand({
-      id: 'press-release-prompt',
-      name: 'Rewrite selection to a press release',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'rewritePressReleaseSelection');
-      },
-    });
-
-    this.addCommand({
-      id: 'translate-selection-prompt',
-      name: 'Translate selection',
-      editorCallback: (editor: Editor) => {
-        new LanguageModal(this.app, (language) => {
-          if (!language) {
-            new Notice('Please select a language.');
-            return;
-          }
-          this.processSelection(editor, 'translateSelection', language);
-        }).open();
-      },
-    });
-
-    this.addCommand({
-      id: 'change-tone-prompt',
-      name: 'Change tone of selection',
-      editorCallback: (editor: Editor) => {
-        new ToneModal(this.app, (tone) => {
-          if (!tone) {
-            new Notice('Please select a tone.');
-            return;
-          }
-          this.processSelection(editor, 'changeToneSelection', tone);
-        }).open();
-      },
-    });
-
-    this.addCommand({
-      id: 'count-tokens',
-      name: 'Count words and tokens in selection',
-      editorCallback: (editor: Editor) => {
-        this.processSelection(editor, 'countTokensSelection');
-      },
-    });
+    registerBuiltInCommands(this);
 
     this.addCommand({
       id: 'add-custom-prompt',
@@ -541,6 +413,10 @@ export default class CopilotPlugin extends Plugin {
   }
 
   async saveSettings(): Promise<void> {
+    if (this.settings.enableEncryption) {
+      // Encrypt all API keys before saving
+      this.encryptionService.encryptAllKeys();
+    }
     await this.saveData(this.settings);
   }
 
@@ -601,6 +477,10 @@ export default class CopilotPlugin extends Plugin {
       chainType: ChainType.LLM_CHAIN, // Set LLM_CHAIN as default ChainType
       options: { forceNewCreation: true } as SetChainOptions,
       openAIProxyBaseUrl: this.settings.openAIProxyBaseUrl,
+      openAIProxyModelName: this.settings.openAIProxyModelName,
+      openAIEmbeddingProxyBaseUrl: this.settings.openAIEmbeddingProxyBaseUrl,
+      openAIEmbeddingProxyModelName:
+        this.settings.openAIEmbeddingProxyModelName,
     };
   }
 }

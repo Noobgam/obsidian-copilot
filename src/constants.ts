@@ -1,4 +1,4 @@
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 
 export const CHAT_VIEWTYPE = 'copilot-chat-view';
 export const USER_SENDER = 'user';
@@ -130,6 +130,9 @@ export const DEFAULT_SETTINGS: CopilotSettings = {
   contextTurns: 15,
   userSystemPrompt: '',
   openAIProxyBaseUrl: '',
+  openAIProxyModelName: '',
+  openAIEmbeddingProxyBaseUrl: '',
+  openAIEmbeddingProxyModelName: '',
   ollamaModel: 'llama2',
   ollamaBaseUrl: '',
   lmStudioBaseUrl: 'http://localhost:1234/v1',
@@ -140,4 +143,5 @@ export const DEFAULT_SETTINGS: CopilotSettings = {
   chatNoteContextPath: '',
   chatNoteContextTags: [],
   debug: false,
+  enableEncryption: false,
 };

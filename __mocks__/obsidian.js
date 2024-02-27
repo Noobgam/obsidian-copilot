@@ -26,6 +26,9 @@ module.exports = {
       }),
     };
   }),
+  Platform: {
+    isDesktop: true,
+  },
   parseYaml: jest.fn().mockImplementation((content) => {
     return yaml.load(content);
   }),

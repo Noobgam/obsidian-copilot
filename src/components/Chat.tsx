@@ -8,7 +8,7 @@ import { AI_SENDER, USER_SENDER } from '@/constants';
 import { AppContext, ChatSharedContext } from '@/context';
 import { CustomPromptProcessor } from '@/customPromptProcessor';
 import { getAIResponse, GetAiResponseOptions } from '@/langchainStream';
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 import SharedState, {
   ChatMessage,
   generateMessageId,
@@ -252,7 +252,7 @@ const Chat: React.FC<ChatProps> = ({
         ...(await getNotesFromPath(vault, settings.chatNoteContextPath)),
       ];
     }
-    if (settings.chatNoteContextTags) {
+    if (settings.chatNoteContextTags?.length > 0) {
       // Get all notes with the specified tags
       // If path is provided, get all notes with the specified tags in the path
       // If path is not provided, get all notes with the specified tags

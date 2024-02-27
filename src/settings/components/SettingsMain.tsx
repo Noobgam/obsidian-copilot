@@ -5,7 +5,7 @@ import {
   ChatModelDisplayNames,
   DEFAULT_SETTINGS,
   DISPLAY_NAME_TO_MODEL,
-} from '../../constants';
+} from '@/constants';
 import AdvancedSettings from './AdvancedSettings';
 import ApiSettings from './ApiSettings';
 import LocalCopilotSettings from './LocalCopilotSettings';
@@ -90,6 +90,13 @@ export default function SettingsMain({
   const [openAIProxyBaseUrl, setOpenAIProxyBaseUrl] = useState(
     plugin.settings.openAIProxyBaseUrl
   );
+  const [openAIProxyModelName, setOpenAIProxyModelName] = useState(
+    plugin.settings.openAIProxyModelName
+  );
+  const [openAIEmbeddingProxyBaseUrl, setOpenAIEmbeddingProxyBaseUrl] =
+    useState(plugin.settings.openAIEmbeddingProxyBaseUrl);
+  const [openAIEmbeddingProxyModelName, setOpenAIEmbeddingProxyModelName] =
+    useState(plugin.settings.openAIEmbeddingProxyModelName);
 
   // Local Copilot Settings
   const [lmStudioBaseUrl, setlmStudioBaseUrl] = useState(
@@ -137,6 +144,10 @@ export default function SettingsMain({
     // Advanced settings
     plugin.settings.userSystemPrompt = userSystemPrompt;
     plugin.settings.openAIProxyBaseUrl = openAIProxyBaseUrl;
+    plugin.settings.openAIProxyModelName = openAIProxyModelName;
+    plugin.settings.openAIEmbeddingProxyBaseUrl = openAIEmbeddingProxyBaseUrl;
+    plugin.settings.openAIEmbeddingProxyModelName =
+      openAIEmbeddingProxyModelName;
 
     // Local Copilot Settings
     plugin.settings.lmStudioBaseUrl = lmStudioBaseUrl;
@@ -276,6 +287,12 @@ export default function SettingsMain({
       <AdvancedSettings
         openAIProxyBaseUrl={openAIProxyBaseUrl}
         setOpenAIProxyBaseUrl={setOpenAIProxyBaseUrl}
+        openAIProxyModelName={openAIProxyModelName}
+        setOpenAIProxyModelName={setOpenAIProxyModelName}
+        openAIEmbeddingProxyBaseUrl={openAIEmbeddingProxyBaseUrl}
+        setOpenAIEmbeddingProxyBaseUrl={setOpenAIEmbeddingProxyBaseUrl}
+        openAIEmbeddingProxyModelName={openAIEmbeddingProxyModelName}
+        setOpenAIEmbeddingProxyModelName={setOpenAIEmbeddingProxyModelName}
         userSystemPrompt={userSystemPrompt}
         setUserSystemPrompt={setUserSystemPrompt}
       />

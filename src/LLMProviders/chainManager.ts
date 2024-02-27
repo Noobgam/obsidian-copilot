@@ -1,6 +1,7 @@
 import { LangChainParams, SetChainOptions } from '@/aiParams';
 import ChainFactory, { ChainType } from '@/chainFactory';
 import { AI_SENDER, ChatModelDisplayNames } from '@/constants';
+import EncryptionService from '@/encryptionService';
 import { ProxyChatOpenAI } from '@/langchainWrappers';
 import { ChatMessage, generateMessageId } from '@/sharedState';
 import { extractChatHistory, getModelName, isSupportedChain } from '@/utils';
@@ -28,18 +29,26 @@ export default class ChainManager {
 
   private static isOllamaModelActive = false;
   private static isOpenRouterModelActive = false;
-  public chatModelManager: ChatModelManager;
-  public langChainParams: LangChainParams;
-  public memoryManager: MemoryManager;
   private vectorStore: MemoryVectorStore;
   private promptManager: PromptManager;
   private embeddingsManager: EmbeddingsManager;
+  private encryptionService: EncryptionService;
+  public chatModelManager: ChatModelManager;
+  public langChainParams: LangChainParams;
+  public memoryManager: MemoryManager;
 
-  private constructor(langChainParams: LangChainParams) {
+  private constructor(
+    langChainParams: LangChainParams,
+    encryptionService: EncryptionService
+  ) {
     // Instantiate singletons
     this.langChainParams = langChainParams;
     this.memoryManager = MemoryManager.getInstance(this.langChainParams);
-    this.chatModelManager = ChatModelManager.getInstance(this.langChainParams);
+    this.encryptionService = encryptionService;
+    this.chatModelManager = ChatModelManager.getInstance(
+      this.langChainParams,
+      encryptionService
+    );
     this.promptManager = PromptManager.getInstance(this.langChainParams);
   }
 
@@ -49,10 +58,13 @@ export default class ChainManager {
    * @param {LangChainParams} langChainParams - the parameters for language chaining
    * @return {void}
    */
-  async create(langChainParams: LangChainParams): Promise<ChainManager> {
-    const chainManager = new ChainManager(langChainParams);
+  static async create(
+    langChainParams: LangChainParams,
+    encryptionService: EncryptionService
+  ): Promise<ChainManager> {
+    const chainManager = new ChainManager(langChainParams, encryptionService);
     await chainManager.createChainWithNewModel(
-      this.langChainParams.modelDisplayName
+      langChainParams.modelDisplayName
     );
     return chainManager;
   }
@@ -133,7 +145,8 @@ export default class ChainManager {
     // MUST set embeddingsManager when switching to QA mode
     if (chainType === ChainType.RETRIEVAL_QA_CHAIN) {
       this.embeddingsManager = EmbeddingsManager.getInstance(
-        this.langChainParams
+        this.langChainParams,
+        this.encryptionService
       );
     }
 
