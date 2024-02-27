@@ -105,6 +105,6 @@ export class CustomPromptProcessor {
       }
     }
 
-    return processedPrompt + "\n\n" + additionalInfo;
+    return processedPrompt + '\n\n' + additionalInfo;
   }
 }

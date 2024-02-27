@@ -90,9 +90,13 @@ export default function SettingsMain({
   const [openAIProxyBaseUrl, setOpenAIProxyBaseUrl] = useState(
     plugin.settings.openAIProxyBaseUrl
   );
-  const [openAIProxyModelName, setOpenAIProxyModelName] = useState(plugin.settings.openAIProxyModelName);
-  const [openAIEmbeddingProxyBaseUrl, setOpenAIEmbeddingProxyBaseUrl] = useState(plugin.settings.openAIEmbeddingProxyBaseUrl);
-  const [openAIEmbeddingProxyModelName, setOpenAIEmbeddingProxyModelName] = useState(plugin.settings.openAIEmbeddingProxyModelName);
+  const [openAIProxyModelName, setOpenAIProxyModelName] = useState(
+    plugin.settings.openAIProxyModelName
+  );
+  const [openAIEmbeddingProxyBaseUrl, setOpenAIEmbeddingProxyBaseUrl] =
+    useState(plugin.settings.openAIEmbeddingProxyBaseUrl);
+  const [openAIEmbeddingProxyModelName, setOpenAIEmbeddingProxyModelName] =
+    useState(plugin.settings.openAIEmbeddingProxyModelName);
 
   // Local Copilot Settings
   const [lmStudioBaseUrl, setlmStudioBaseUrl] = useState(
@@ -142,7 +146,8 @@ export default function SettingsMain({
     plugin.settings.openAIProxyBaseUrl = openAIProxyBaseUrl;
     plugin.settings.openAIProxyModelName = openAIProxyModelName;
     plugin.settings.openAIEmbeddingProxyBaseUrl = openAIEmbeddingProxyBaseUrl;
-    plugin.settings.openAIEmbeddingProxyModelName = openAIEmbeddingProxyModelName;
+    plugin.settings.openAIEmbeddingProxyModelName =
+      openAIEmbeddingProxyModelName;
 
     // Local Copilot Settings
     plugin.settings.lmStudioBaseUrl = lmStudioBaseUrl;

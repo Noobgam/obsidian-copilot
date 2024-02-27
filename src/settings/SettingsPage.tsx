@@ -94,18 +94,19 @@ export class CopilotSettingTab extends PluginSettingTab {
     devModeHeader.style.marginTop = '40px';
 
     new Setting(containerEl)
-      .setName("Enable Encryption")
+      .setName('Enable Encryption')
       .setDesc(
         createFragment((frag) => {
-          frag.appendText("Enable encryption for the API keys.");
+          frag.appendText('Enable encryption for the API keys.');
         })
       )
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.enableEncryption)
-        .onChange(async (value) => {
-          this.plugin.settings.enableEncryption = value;
-          await this.plugin.saveSettings();
-        })
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableEncryption)
+          .onChange(async (value) => {
+            this.plugin.settings.enableEncryption = value;
+            await this.plugin.saveSettings();
+          })
       );
 
     new Setting(containerEl)

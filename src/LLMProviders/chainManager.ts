@@ -39,13 +39,16 @@ export default class ChainManager {
 
   private constructor(
     langChainParams: LangChainParams,
-    encryptionService: EncryptionService,
+    encryptionService: EncryptionService
   ) {
     // Instantiate singletons
     this.langChainParams = langChainParams;
     this.memoryManager = MemoryManager.getInstance(this.langChainParams);
     this.encryptionService = encryptionService;
-    this.chatModelManager = ChatModelManager.getInstance(this.langChainParams, encryptionService);
+    this.chatModelManager = ChatModelManager.getInstance(
+      this.langChainParams,
+      encryptionService
+    );
     this.promptManager = PromptManager.getInstance(this.langChainParams);
   }
 
@@ -55,16 +58,13 @@ export default class ChainManager {
    * @param {LangChainParams} langChainParams - the parameters for language chaining
    * @return {void}
    */
-  async create(
+  static async create(
     langChainParams: LangChainParams,
-    encryptionService: EncryptionService,
+    encryptionService: EncryptionService
   ): Promise<ChainManager> {
-    const chainManager = new ChainManager(
-      langChainParams,
-      encryptionService
-    );
+    const chainManager = new ChainManager(langChainParams, encryptionService);
     await chainManager.createChainWithNewModel(
-      this.langChainParams.modelDisplayName
+      langChainParams.modelDisplayName
     );
     return chainManager;
   }
@@ -145,8 +145,9 @@ export default class ChainManager {
     // MUST set embeddingsManager when switching to QA mode
     if (chainType === ChainType.RETRIEVAL_QA_CHAIN) {
       this.embeddingsManager = EmbeddingsManager.getInstance(
-        this.langChainParams
-      , this.encryptionService);
+        this.langChainParams,
+        this.encryptionService
+      );
     }
 
     // Get chatModel, memory, prompt, and embeddingAPI from respective managers

@@ -30,7 +30,6 @@ export default class ChatModelManager {
     }
   >;
 
-
   private constructor(
     private langChainParams: LangChainParams,
     encryptionService: EncryptionService
@@ -41,10 +40,13 @@ export default class ChatModelManager {
 
   static getInstance(
     langChainParams: LangChainParams,
-    encryptionService: EncryptionService,
+    encryptionService: EncryptionService
   ): ChatModelManager {
     if (!ChatModelManager.instance) {
-      ChatModelManager.instance = new ChatModelManager(langChainParams, encryptionService);
+      ChatModelManager.instance = new ChatModelManager(
+        langChainParams,
+        encryptionService
+      );
     }
     return ChatModelManager.instance;
   }
@@ -95,7 +97,8 @@ export default class ChatModelManager {
   }
 
   private getModelConfig(chatModelProvider: string): ModelConfig {
-    const decrypt = (key: string) => this.encryptionService.getDecryptedKey(key);
+    const decrypt = (key: string) =>
+      this.encryptionService.getDecryptedKey(key);
     const params = this.langChainParams;
     const baseConfig: ModelConfig = {
       modelName: params.model,

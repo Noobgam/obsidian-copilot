@@ -1,5 +1,5 @@
-import { CopilotSettings } from "@/settings/SettingsPage";
-import { Platform } from "obsidian";
+import { CopilotSettings } from '@/settings/SettingsPage';
+import { Platform } from 'obsidian';
 
 // Dynamically import electron to access safeStorage
 // @ts-ignore
@@ -7,13 +7,13 @@ let safeStorage: Electron.SafeStorage;
 
 if (Platform.isDesktop) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  safeStorage = require("electron")?.remote?.safeStorage;
+  safeStorage = require('electron')?.remote?.safeStorage;
 }
 
 export default class EncryptionService {
   private settings: CopilotSettings;
-  private static ENCRYPTION_PREFIX = "enc_";
-  private static DECRYPTION_PREFIX = "dec_";
+  private static ENCRYPTION_PREFIX = 'enc_';
+  private static DECRYPTION_PREFIX = 'dec_';
 
   constructor(settings: CopilotSettings) {
     this.settings = settings;
@@ -29,20 +29,19 @@ export default class EncryptionService {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private isDecrypted(keyBuffer: any): boolean {
-    return (
-      keyBuffer.startsWith(EncryptionService.DECRYPTION_PREFIX)
-    );
+    return keyBuffer.startsWith(EncryptionService.DECRYPTION_PREFIX);
   }
 
   public encryptAllKeys(): void {
     const keysToEncrypt = Object.keys(this.settings).filter((key) =>
-      key.toLowerCase().includes("apikey".toLowerCase())
+      key.toLowerCase().includes('apikey'.toLowerCase())
     );
 
     for (const key of keysToEncrypt) {
       const apiKey = this.settings[key as keyof CopilotSettings] as string;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.settings[key as keyof CopilotSettings] as any) = this.getEncryptedKey(apiKey);
+      (this.settings[key as keyof CopilotSettings] as any) =
+        this.getEncryptedKey(apiKey);
     }
   }
 
@@ -61,12 +60,12 @@ export default class EncryptionService {
     // Make sure what's encrypted is the plain text api key
     if (this.isDecrypted(apiKey)) {
       // Remove the prefix if the key is decrypted
-      apiKey = apiKey.replace(EncryptionService.DECRYPTION_PREFIX, "");
+      apiKey = apiKey.replace(EncryptionService.DECRYPTION_PREFIX, '');
     }
     const encryptedBuffer = safeStorage.encryptString(apiKey) as Buffer;
     // Convert the encrypted buffer to a Base64 string and prepend the prefix
     return (
-      EncryptionService.ENCRYPTION_PREFIX + encryptedBuffer.toString("base64")
+      EncryptionService.ENCRYPTION_PREFIX + encryptedBuffer.toString('base64')
     );
   }
 
@@ -79,19 +78,16 @@ export default class EncryptionService {
       return apiKey; // Return as is if the key is in plain text
     }
     if (this.isDecrypted(apiKey)) {
-      return apiKey.replace(EncryptionService.DECRYPTION_PREFIX, "");
+      return apiKey.replace(EncryptionService.DECRYPTION_PREFIX, '');
     }
 
     // Remove the prefix and convert from Base64 to a buffer before decryption
-    const base64Data = apiKey.replace(
-      EncryptionService.ENCRYPTION_PREFIX,
-      ""
-    );
+    const base64Data = apiKey.replace(EncryptionService.ENCRYPTION_PREFIX, '');
     try {
-      const buffer = Buffer.from(base64Data, "base64");
+      const buffer = Buffer.from(base64Data, 'base64');
       return safeStorage.decryptString(buffer) as string;
     } catch (err) {
-      return "Copilot failed to decrypt API keys!";
+      return 'Copilot failed to decrypt API keys!';
     }
   }
 }

@@ -25,35 +25,35 @@ export interface ModelConfig {
 }
 
 export interface LangChainParams {
-  openAIApiKey: string,
-  huggingfaceApiKey: string,
-  cohereApiKey: string,
-  anthropicApiKey: string,
-  azureOpenAIApiKey: string,
-  azureOpenAIApiInstanceName: string,
-  azureOpenAIApiDeploymentName: string,
-  azureOpenAIApiVersion: string,
-  azureOpenAIApiEmbeddingDeploymentName: string,
-  googleApiKey: string,
-  openRouterAiApiKey: string,
-  model: string,
-  modelDisplayName: string,
-  embeddingModel: string,
-  temperature: number,
-  maxTokens: number,
-  systemMessage: string,
-  chatContextTurns: number,
-  embeddingProvider: string,
-  chainType: ChainType,  // Default ChainType is set in main.ts getChainManagerParams
-  options: SetChainOptions,
-  ollamaModel: string,
-  ollamaBaseUrl: string,
-  openRouterModel: string,
-  lmStudioBaseUrl: string,
-  openAIProxyBaseUrl?: string,
-  openAIProxyModelName?: string,
-  openAIEmbeddingProxyBaseUrl?: string,
-  openAIEmbeddingProxyModelName?: string,
+  openAIApiKey: string;
+  huggingfaceApiKey: string;
+  cohereApiKey: string;
+  anthropicApiKey: string;
+  azureOpenAIApiKey: string;
+  azureOpenAIApiInstanceName: string;
+  azureOpenAIApiDeploymentName: string;
+  azureOpenAIApiVersion: string;
+  azureOpenAIApiEmbeddingDeploymentName: string;
+  googleApiKey: string;
+  openRouterAiApiKey: string;
+  model: string;
+  modelDisplayName: string;
+  embeddingModel: string;
+  temperature: number;
+  maxTokens: number;
+  systemMessage: string;
+  chatContextTurns: number;
+  embeddingProvider: string;
+  chainType: ChainType; // Default ChainType is set in main.ts getChainManagerParams
+  options: SetChainOptions;
+  ollamaModel: string;
+  ollamaBaseUrl: string;
+  openRouterModel: string;
+  lmStudioBaseUrl: string;
+  openAIProxyBaseUrl?: string;
+  openAIProxyModelName?: string;
+  openAIEmbeddingProxyBaseUrl?: string;
+  openAIEmbeddingProxyModelName?: string;
 }
 
 export interface SetChainOptions {

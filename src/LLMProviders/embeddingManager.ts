@@ -11,21 +11,25 @@ export default class EmbeddingManager {
   private static instance: EmbeddingManager;
   private constructor(
     private langChainParams: LangChainParams,
-    private encryptionService: EncryptionService,
+    private encryptionService: EncryptionService
   ) {}
 
   static getInstance(
     langChainParams: LangChainParams,
-    encryptionService: EncryptionService,
+    encryptionService: EncryptionService
   ): EmbeddingManager {
     if (!EmbeddingManager.instance) {
-      EmbeddingManager.instance = new EmbeddingManager(langChainParams, encryptionService);
+      EmbeddingManager.instance = new EmbeddingManager(
+        langChainParams,
+        encryptionService
+      );
     }
     return EmbeddingManager.instance;
   }
 
   getEmbeddingsAPI(): Embeddings | undefined {
-    const decrypt = (key: string) => this.encryptionService.getDecryptedKey(key);
+    const decrypt = (key: string) =>
+      this.encryptionService.getDecryptedKey(key);
     const {
       openAIApiKey,
       azureOpenAIApiKey,
@@ -36,24 +40,28 @@ export default class EmbeddingManager {
       openAIEmbeddingProxyModelName,
     } = this.langChainParams;
 
-    const OpenAIEmbeddingsAPI = openAIApiKey ? (
-      openAIEmbeddingProxyBaseUrl ?
-        new ProxyOpenAIEmbeddings({
-          modelName: openAIEmbeddingProxyModelName || this.langChainParams.embeddingModel,
-          openAIApiKey: decrypt(openAIApiKey),
-          maxRetries: 3,
-          maxConcurrency: 3,
-          timeout: 10000,
-          openAIEmbeddingProxyBaseUrl,
-        }) :
-        new OpenAIEmbeddings({
-          modelName: openAIEmbeddingProxyModelName || this.langChainParams.embeddingModel,
-          openAIApiKey: decrypt(openAIApiKey),
-          maxRetries: 3,
-          maxConcurrency: 3,
-          timeout: 10000,
-        })
-    ) : null;
+    const OpenAIEmbeddingsAPI = openAIApiKey
+      ? openAIEmbeddingProxyBaseUrl
+        ? new ProxyOpenAIEmbeddings({
+            modelName:
+              openAIEmbeddingProxyModelName ||
+              this.langChainParams.embeddingModel,
+            openAIApiKey: decrypt(openAIApiKey),
+            maxRetries: 3,
+            maxConcurrency: 3,
+            timeout: 10000,
+            openAIEmbeddingProxyBaseUrl,
+          })
+        : new OpenAIEmbeddings({
+            modelName:
+              openAIEmbeddingProxyModelName ||
+              this.langChainParams.embeddingModel,
+            openAIApiKey: decrypt(openAIApiKey),
+            maxRetries: 3,
+            maxConcurrency: 3,
+            timeout: 10000,
+          })
+      : null;
 
     switch (this.langChainParams.embeddingProvider) {
       case ModelProviders.OPENAI:
@@ -98,7 +106,9 @@ export default class EmbeddingManager {
         return (
           OpenAIEmbeddingsAPI ||
           new OpenAIEmbeddings({
-            modelName: openAIEmbeddingProxyModelName || this.langChainParams.embeddingModel,
+            modelName:
+              openAIEmbeddingProxyModelName ||
+              this.langChainParams.embeddingModel,
             openAIApiKey: 'default-key',
             maxRetries: 3,
             maxConcurrency: 3,

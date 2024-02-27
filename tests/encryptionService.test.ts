@@ -7,12 +7,18 @@ jest.mock('electron', () => {
   return {
     remote: {
       safeStorage: {
-        encryptString: jest.fn().mockImplementation((text) => `encrypted_${text}`),
-        decryptString: jest.fn().mockImplementation((buffer) => buffer.toString().replace('encrypted_', '')),
+        encryptString: jest
+          .fn()
+          .mockImplementation((text) => `encrypted_${text}`),
+        decryptString: jest
+          .fn()
+          .mockImplementation((buffer) =>
+            buffer.toString().replace('encrypted_', '')
+          ),
         isEncryptionAvailable: jest.fn().mockReturnValue(true),
       },
     },
-  }
+  };
 });
 
 describe('Platform-specific Tests', () => {
