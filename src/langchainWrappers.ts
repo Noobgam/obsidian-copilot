@@ -4,6 +4,7 @@ import OpenAI from 'openai';
 
 // Migrated to OpenAI v4 client from v3: https://github.com/openai/openai-node/discussions/217
 export class ProxyChatOpenAI extends ChatOpenAI {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(fields?: any) {
     super(fields ?? {});
 
@@ -16,6 +17,7 @@ export class ProxyChatOpenAI extends ChatOpenAI {
 }
 
 export class ProxyOpenAIEmbeddings extends OpenAIEmbeddings {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(fields?: any) {
     super(fields ?? {});
 

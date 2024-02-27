@@ -194,7 +194,7 @@ const Chat: React.FC<ChatProps> = ({
 
     // intentional skip of await.
     // eslint-disable-next-line  @typescript-eslint/no-floating-promises
-    launchAIResponse({ userMessage });
+    launchAIResponse({ userMessage, extraOptions: { useTools: true } });
   };
 
   const handleKeyDown = async (

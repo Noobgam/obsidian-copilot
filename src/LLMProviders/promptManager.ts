@@ -25,6 +25,17 @@ export default class PromptManager {
     return this.chatPrompt;
   }
 
+  getAgentPrompt(): ChatPromptTemplate {
+    return ChatPromptTemplate.fromMessages([
+      SystemMessagePromptTemplate.fromTemplate(
+        this.langChainParams.systemMessage
+      ),
+      new MessagesPlaceholder('history'),
+      HumanMessagePromptTemplate.fromTemplate('{input}'),
+      new MessagesPlaceholder('agent_scratchpad'),
+    ]);
+  }
+
   private initChatPrompt(): void {
     this.chatPrompt = ChatPromptTemplate.fromMessages([
       SystemMessagePromptTemplate.fromTemplate(

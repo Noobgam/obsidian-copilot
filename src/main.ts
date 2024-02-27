@@ -348,8 +348,8 @@ export default class CopilotPlugin extends Plugin {
 
     // Without the timeout, the view is not yet active
     setTimeout(() => {
-      const activeCopilotView = this.app.workspace
-        .getLeavesOfType(CHAT_VIEWTYPE)
+      const activeCopilotView = this.app
+        .workspace!.getLeavesOfType(CHAT_VIEWTYPE)
         .find((leaf) => leaf.view instanceof CopilotView)?.view as CopilotView;
       if (activeCopilotView && (!checkSelectedText || selectedText)) {
         activeCopilotView.emitter.emit(eventType, selectedText, eventSubtype);
@@ -373,7 +373,7 @@ export default class CopilotPlugin extends Plugin {
   async activateView() {
     this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
     this.activateViewPromise = this.app.workspace
-      .getRightLeaf(false)
+      .getRightLeaf(false)!
       .setViewState({
         type: CHAT_VIEWTYPE,
         active: true,

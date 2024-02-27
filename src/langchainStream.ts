@@ -8,6 +8,7 @@ export type GetAiResponseOptions = {
   debug?: boolean;
   ignoreSystemMessage?: boolean;
   updateLoading?: (loading: boolean) => void;
+  useTools?: boolean;
 };
 
 export const getAIResponse = async (
@@ -16,11 +17,7 @@ export const getAIResponse = async (
   addMessage: (message: ChatMessage) => void,
   updateCurrentAiMessage: (message: string) => void,
   updateShouldAbort: (abortController: AbortController | null) => void,
-  options: {
-    debug?: boolean;
-    ignoreSystemMessage?: boolean;
-    updateLoading?: (loading: boolean) => void;
-  } = {}
+  options: GetAiResponseOptions = {}
 ) => {
   const abortController = new AbortController();
   updateShouldAbort(abortController);
