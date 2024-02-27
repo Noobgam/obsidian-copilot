@@ -1,14 +1,10 @@
-import ChainManager from '@/LLMProviders/chainManager';
+import ChainManager, { RunChainOptions } from '@/LLMProviders/chainManager';
 import { ChatMessage } from '@/sharedState';
 import { Notice } from 'obsidian';
 
 export type Role = 'assistant' | 'user' | 'system';
 
-export type GetAiResponseOptions = {
-  debug?: boolean;
-  ignoreSystemMessage?: boolean;
-  updateLoading?: (loading: boolean) => void;
-};
+export type GetAiResponseOptions = RunChainOptions;
 
 export const getAIResponse = async (
   userMessage: ChatMessage,
@@ -16,11 +12,7 @@ export const getAIResponse = async (
   addMessage: (message: ChatMessage) => void,
   updateCurrentAiMessage: (message: string) => void,
   updateShouldAbort: (abortController: AbortController | null) => void,
-  options: {
-    debug?: boolean;
-    ignoreSystemMessage?: boolean;
-    updateLoading?: (loading: boolean) => void;
-  } = {}
+  options: GetAiResponseOptions = {}
 ) => {
   const abortController = new AbortController();
   updateShouldAbort(abortController);
