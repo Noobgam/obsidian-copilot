@@ -1,5 +1,5 @@
 import EncryptionService from '@/encryptionService';
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings, EncryptionSettings } from '@/settings/SettingsPage';
 import { Platform } from 'obsidian';
 
 // Mocking Electron's safeStorage
@@ -37,9 +37,7 @@ describe('Platform-specific Tests', () => {
   });
 });
 
-interface TestSettings extends CopilotSettings {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+interface TestSettings extends EncryptionSettings {
 }
 
 describe('EncryptionService', () => {
@@ -98,25 +96,25 @@ describe('EncryptionService', () => {
     beforeEach(() => {
       settings = {
         enableEncryption: true,
-        someApiKey: 'testApiKey',
-        anotherApiKey: 'anotherTestApiKey',
+        anthropicApiKey: 'testApiKey',
+        cohereApiKey: 'anotherTestApiKey',
         nonKey: 'shouldBeIgnored',
-      } as unknown as CopilotSettings;
+      } as unknown as EncryptionSettings;
       service = new EncryptionService(settings);
     });
 
     it('should encrypt all keys containing "apikey"', () => {
       service.encryptAllKeys();
-      expect(settings.someApiKey).toBe('enc_encrypted_testApiKey');
-      expect(settings.anotherApiKey).toBe('enc_encrypted_anotherTestApiKey');
-      expect(settings.nonApiKey).toBe(undefined);
+      expect(settings.anthropicApiKey).toBe('enc_encrypted_testApiKey');
+      expect(settings.cohereApiKey).toBe('enc_encrypted_anotherTestApiKey');
+      expect(settings.googleApiKey).toBe(undefined);
     });
 
     it('should not encrypt keys when encryption is not enabled', () => {
       settings.enableEncryption = false;
       service.encryptAllKeys();
-      expect(settings.someApiKey).toBe('testApiKey');
-      expect(settings.anotherApiKey).toBe('anotherTestApiKey');
+      expect(settings.anthropicApiKey).toBe('testApiKey');
+      expect(settings.cohereApiKey).toBe('anotherTestApiKey');
     });
   });
 });

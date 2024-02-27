@@ -4,20 +4,11 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import SettingsMain from './components/SettingsMain';
 
-export type CopilotSettings = MainSettings & ChatNoteContextSettings;
-
 interface MainSettings {
-  openAIApiKey: string;
-  huggingfaceApiKey: string;
-  cohereApiKey: string;
-  anthropicApiKey: string;
-  azureOpenAIApiKey: string;
   azureOpenAIApiInstanceName: string;
   azureOpenAIApiDeploymentName: string;
   azureOpenAIApiVersion: string;
   azureOpenAIApiEmbeddingDeploymentName: string;
-  googleApiKey: string;
-  openRouterAiApiKey: string;
   openRouterModel: string;
   defaultModel: string;
   defaultModelDisplayName: string;
@@ -38,14 +29,36 @@ interface MainSettings {
   embeddingProvider: string;
   defaultSaveFolder: string;
   debug: boolean;
+  enableEncryption: boolean;
 }
 
 interface ChatNoteContextSettings {
   chatNoteContextPath: string;
   chatNoteContextTags: string[];
   debug: boolean;
-  enableEncryption: boolean;
 }
+
+export const API_KEY_SETTINGS = [
+  'openAIApiKey',
+  'huggingfaceApiKey',
+  'cohereApiKey',
+  'anthropicApiKey',
+  'azureOpenAIApiKey',
+  'googleApiKey',
+  'openRouterAiApiKey',
+] as const;
+
+export type ApiKeySettings = {
+  [K in (typeof API_KEY_SETTINGS)[number]]: string;
+};
+
+export type EncryptionSettings = { enableEncryption: boolean; } & ApiKeySettings;
+
+export type CopilotSettings =
+  MainSettings &
+  EncryptionSettings &
+  ApiKeySettings &
+  ChatNoteContextSettings;
 
 export class CopilotSettingTab extends PluginSettingTab {
   plugin: CopilotPlugin;

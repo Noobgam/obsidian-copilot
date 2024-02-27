@@ -1,4 +1,4 @@
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { API_KEY_SETTINGS, ApiKeySettings } from '@/settings/SettingsPage';
 import { Platform } from 'obsidian';
 
 // Dynamically import electron to access safeStorage
@@ -10,12 +10,14 @@ if (Platform.isDesktop) {
   safeStorage = require('electron')?.remote?.safeStorage;
 }
 
+type EncryptionSettings = { enableEncryption: boolean; } & ApiKeySettings;
+
 export default class EncryptionService {
-  private settings: CopilotSettings;
+  private settings: EncryptionSettings;
   private static ENCRYPTION_PREFIX = 'enc_';
   private static DECRYPTION_PREFIX = 'dec_';
 
-  constructor(settings: CopilotSettings) {
+  constructor(settings: EncryptionSettings) {
     this.settings = settings;
   }
 
@@ -33,15 +35,13 @@ export default class EncryptionService {
   }
 
   public encryptAllKeys(): void {
-    const keysToEncrypt = Object.keys(this.settings).filter((key) =>
-      key.toLowerCase().includes('apikey'.toLowerCase())
-    );
-
-    for (const key of keysToEncrypt) {
-      const apiKey = this.settings[key as keyof CopilotSettings] as string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (this.settings[key as keyof CopilotSettings] as any) =
-        this.getEncryptedKey(apiKey);
+    for (const key of API_KEY_SETTINGS) {
+      if (!(key in this.settings)) {
+        // skip new api keys
+        continue;
+      }
+      const apiKey = this.settings[key];
+      this.settings[key] = this.getEncryptedKey(apiKey);
     }
   }
 
