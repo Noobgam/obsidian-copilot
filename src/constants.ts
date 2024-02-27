@@ -131,6 +131,9 @@ export const DEFAULT_SETTINGS: CopilotSettings = {
   contextTurns: 15,
   userSystemPrompt: '',
   openAIProxyBaseUrl: '',
+  openAIProxyModelName: '',
+  openAIEmbeddingProxyBaseUrl: '',
+  openAIEmbeddingProxyModelName: '',
   ollamaModel: 'llama2',
   ollamaBaseUrl: '',
   lmStudioBaseUrl: 'http://localhost:1234/v1',
@@ -141,4 +144,5 @@ export const DEFAULT_SETTINGS: CopilotSettings = {
   chatNoteContextPath: '',
   chatNoteContextTags: [],
   debug: false,
+  enableEncryption: false,
 };
