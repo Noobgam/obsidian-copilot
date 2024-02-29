@@ -1,5 +1,4 @@
-import { App, FuzzySuggestModal } from "obsidian";
-
+import { App, FuzzySuggestModal } from 'obsidian';
 
 export class ListPromptModal extends FuzzySuggestModal<string> {
   private onChoosePromptTitle: (promptTitle: string) => void;
@@ -27,5 +26,3 @@ export class ListPromptModal extends FuzzySuggestModal<string> {
     this.onChoosePromptTitle(promptTitle);
   }
 }
-
-

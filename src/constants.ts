@@ -1,15 +1,21 @@
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 
 export const CHAT_VIEWTYPE = 'copilot-chat-view';
 export const USER_SENDER = 'user';
 export const AI_SENDER = 'ai';
-export const DEFAULT_SYSTEM_PROMPT = 'You are Obsidian Copilot, a helpful assistant that integrates AI to Obsidian note-taking.';
+
+export type ALL_SENDERS = typeof USER_SENDER | typeof AI_SENDER;
+
+export const DEFAULT_SYSTEM_PROMPT = `
+	You are Obsidian Copilot, a helpful assistant that integrates AI to Obsidian note-taking.
+	Be mindful that your response will be rendered in markdown, default to markdown formatting of your response. 
+`;
 
 export enum ChatModels {
   GPT_35_TURBO = 'gpt-3.5-turbo',
   GPT_35_TURBO_16K = 'gpt-3.5-turbo-16k',
   GPT_4 = 'gpt-4',
-  GPT_4_TURBO = 'gpt-4-turbo-preview',
+  GPT_4_TURBO = 'gpt-4-0125-preview',
   GPT_4_32K = 'gpt-4-32k',
   GEMINI_PRO = 'gemini-pro',
   OLLAMA = 'ollama',
@@ -29,33 +35,25 @@ export enum ChatModelDisplayNames {
 }
 
 export const OPENAI_MODELS = new Set([
-    ChatModelDisplayNames.GPT_35_TURBO,
-    ChatModelDisplayNames.GPT_35_TURBO_16K,
-    ChatModelDisplayNames.GPT_4,
-    ChatModelDisplayNames.GPT_4_TURBO,
-    ChatModelDisplayNames.GPT_4_32K,
-    ChatModelDisplayNames.LM_STUDIO,
+  ChatModelDisplayNames.GPT_35_TURBO,
+  ChatModelDisplayNames.GPT_35_TURBO_16K,
+  ChatModelDisplayNames.GPT_4,
+  ChatModelDisplayNames.GPT_4_TURBO,
+  ChatModelDisplayNames.GPT_4_32K,
+  ChatModelDisplayNames.LM_STUDIO,
 ]);
 
-export const AZURE_MODELS = new Set([
-    ChatModelDisplayNames.AZURE_OPENAI,
-]);
+export const AZURE_MODELS = new Set([ChatModelDisplayNames.AZURE_OPENAI]);
 
-export const GOOGLE_MODELS = new Set([
-  ChatModelDisplayNames.GEMINI_PRO,
-]);
+export const GOOGLE_MODELS = new Set([ChatModelDisplayNames.GEMINI_PRO]);
 
 export const OPENROUTERAI_MODELS = new Set([
   ChatModelDisplayNames.OPENROUTERAI,
-])
-
-export const OLLAMA_MODELS = new Set([
-  ChatModelDisplayNames.OLLAMA,
 ]);
 
-export const LM_STUDIO_MODELS = new Set([
-  ChatModelDisplayNames.LM_STUDIO,
-]);
+export const OLLAMA_MODELS = new Set([ChatModelDisplayNames.OLLAMA]);
+
+export const LM_STUDIO_MODELS = new Set([ChatModelDisplayNames.LM_STUDIO]);
 
 export const DISPLAY_NAME_TO_MODEL: Record<string, string> = {
   [ChatModelDisplayNames.GPT_35_TURBO]: ChatModels.GPT_35_TURBO,
@@ -100,7 +98,8 @@ export const EMBEDDING_PROVIDERS = [
 export const ADA_V2 = 'text-embedding-ada-002';
 export const OPENAI_EMBEDDING_SMALL = 'text-embedding-3-small';
 export const OPENAI_EMBEDDING_LARGE = 'text-embedding-3-large';
-export const DISTILBERT_NLI = 'sentence-transformers/distilbert-base-nli-mean-tokens';
+export const DISTILBERT_NLI =
+  'sentence-transformers/distilbert-base-nli-mean-tokens';
 export const INSTRUCTOR_XL = 'hkunlp/instructor-xl'; // Inference API is off for this
 export const MPNET_V2 = 'sentence-transformers/all-mpnet-base-v2'; // Inference API returns 400
 
@@ -108,7 +107,7 @@ export const OPENAI_EMBEDDING_MODELS = [
   ADA_V2,
   OPENAI_EMBEDDING_SMALL,
   OPENAI_EMBEDDING_LARGE,
-]
+];
 
 export const DEFAULT_SETTINGS: CopilotSettings = {
   openAIApiKey: '',

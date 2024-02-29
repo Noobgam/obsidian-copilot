@@ -3,15 +3,16 @@ import Chat from '@/components/Chat';
 import { CHAT_VIEWTYPE } from '@/constants';
 import { AppContext } from '@/context';
 import CopilotPlugin from '@/main';
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings } from '@/settings/settings';
 import SharedState from '@/sharedState';
 import { EventEmitter } from 'events';
 import { ItemView, Vault, WorkspaceLeaf } from 'obsidian';
 import * as React from 'react';
-import { Root, createRoot } from 'react-dom/client';
-
+import { createRoot, Root } from 'react-dom/client';
 
 export default class CopilotView extends ItemView {
+  emitter: EventEmitter;
+  userSystemPrompt = '';
   private sharedState: SharedState;
   private chainManager: ChainManager;
   private root: Root | null = null;
@@ -19,10 +20,11 @@ export default class CopilotView extends ItemView {
   private settings: CopilotSettings;
   private defaultSaveFolder: string;
   private debug = false;
-  emitter: EventEmitter;
-  userSystemPrompt = '';
 
-  constructor(leaf: WorkspaceLeaf, private plugin: CopilotPlugin) {
+  constructor(
+    leaf: WorkspaceLeaf,
+    private plugin: CopilotPlugin
+  ) {
     super(leaf);
     this.sharedState = plugin.sharedState;
     this.settings = plugin.settings;
@@ -54,7 +56,7 @@ export default class CopilotView extends ItemView {
     return 'Copilot';
   }
 
-  async getChatVisibility(){
+  async getChatVisibility() {
     if (this.plugin.activateViewPromise) {
       await this.plugin.activateViewPromise;
     }

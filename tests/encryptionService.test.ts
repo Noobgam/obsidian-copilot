@@ -1,5 +1,5 @@
 import EncryptionService from '@/encryptionService';
-import { CopilotSettings } from '@/settings/SettingsPage';
+import { CopilotSettings, EncryptionSettings } from '@/settings/settings';
 import { Platform } from 'obsidian';
 
 // Mocking Electron's safeStorage
@@ -7,12 +7,18 @@ jest.mock('electron', () => {
   return {
     remote: {
       safeStorage: {
-        encryptString: jest.fn().mockImplementation((text) => `encrypted_${text}`),
-        decryptString: jest.fn().mockImplementation((buffer) => buffer.toString().replace('encrypted_', '')),
+        encryptString: jest
+          .fn()
+          .mockImplementation((text) => `encrypted_${text}`),
+        decryptString: jest
+          .fn()
+          .mockImplementation((buffer) =>
+            buffer.toString().replace('encrypted_', '')
+          ),
         isEncryptionAvailable: jest.fn().mockReturnValue(true),
       },
     },
-  }
+  };
 });
 
 describe('Platform-specific Tests', () => {
@@ -31,14 +37,9 @@ describe('Platform-specific Tests', () => {
   });
 });
 
-interface TestSettings extends CopilotSettings {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
-
 describe('EncryptionService', () => {
   let service: EncryptionService;
-  let settings: TestSettings;
+  let settings: EncryptionSettings;
 
   beforeEach(() => {
     jest.resetModules();
@@ -92,25 +93,25 @@ describe('EncryptionService', () => {
     beforeEach(() => {
       settings = {
         enableEncryption: true,
-        someApiKey: 'testApiKey',
-        anotherApiKey: 'anotherTestApiKey',
+        anthropicApiKey: 'testApiKey',
+        cohereApiKey: 'anotherTestApiKey',
         nonKey: 'shouldBeIgnored',
-      } as unknown as CopilotSettings;
+      } as unknown as EncryptionSettings;
       service = new EncryptionService(settings);
     });
 
     it('should encrypt all keys containing "apikey"', () => {
       service.encryptAllKeys();
-      expect(settings.someApiKey).toBe('enc_encrypted_testApiKey');
-      expect(settings.anotherApiKey).toBe('enc_encrypted_anotherTestApiKey');
-      expect(settings.nonApiKey).toBe(undefined);
+      expect(settings.anthropicApiKey).toBe('enc_encrypted_testApiKey');
+      expect(settings.cohereApiKey).toBe('enc_encrypted_anotherTestApiKey');
+      expect(settings.googleApiKey).toBe(undefined);
     });
 
     it('should not encrypt keys when encryption is not enabled', () => {
       settings.enableEncryption = false;
       service.encryptAllKeys();
-      expect(settings.someApiKey).toBe('testApiKey');
-      expect(settings.anotherApiKey).toBe('anotherTestApiKey');
+      expect(settings.anthropicApiKey).toBe('testApiKey');
+      expect(settings.cohereApiKey).toBe('anotherTestApiKey');
     });
   });
 });
