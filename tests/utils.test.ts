@@ -1,12 +1,11 @@
 import * as Obsidian from 'obsidian';
-import { TFile } from 'obsidian';
 import {
   getNotesFromPath,
-  getNotesFromTags,
-  getTagsFromContent,
+  getTagsFromNote,
   isFolderMatch,
   processVariableNameForNotePath,
-} from '../src/utils';
+} from '@/utils';
+import { TFile } from 'obsidian';
 
 describe('isFolderMatch', () => {
   it('should return file from the folder name 1', async () => {
@@ -38,7 +37,7 @@ describe('isFolderMatch', () => {
 describe('Vault', () => {
   it('should return all markdown files', async () => {
     const vault = new Obsidian.Vault();
-    const files = await vault.getMarkdownFiles();
+    const files = vault.getMarkdownFiles();
     expect(files).toEqual([
       { path: 'test/test2/note1.md' },
       { path: 'test/note2.md' },
@@ -151,139 +150,13 @@ describe('getNotesFromPath', () => {
   });
 });
 
-describe('getTagsFromContent', () => {
-  it('with valid note with no tags returns empty list', async () => {
-    const result = await getTagsFromContent(
-      'some random text, --- even some yamlish thing ---. # some header ## some header 2'
+describe('getNoteTags', () => {
+  it('returns tags from frontmatter and content', async () => {
+    const tags = await getTagsFromNote(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { path: 'note4.md' } as any as TFile,
+      app
     );
-    expect(result).toEqual([]);
-  });
-
-  it('empty note works', async () => {
-    const result = await getTagsFromContent('');
-    expect(result).toEqual([]);
-  });
-
-  it('tags as properties work', async () => {
-    const result = await getTagsFromContent(
-      `---
-      tags:
-        - random_tag
-      ---
-      `
-    );
-    expect(result).toEqual(['random_tag']);
-  });
-
-  it('order of tags is preserved', async () => {
-    const result = await getTagsFromContent(
-      `---
-      tags:
-        - random_tag
-        - random_tag2
-      ---
-      `
-    );
-    expect(result).toEqual(['random_tag', 'random_tag2']);
-  });
-
-  it('tags in note content work', async () => {
-    const result = await getTagsFromContent(
-      `---
-      tags:
-        - random_tag
-        - random_tag2
-      ---
-      
-      #random_tag_3`
-    );
-    expect(result).toEqual(['random_tag', 'random_tag2', 'random_tag_3']);
-  });
-
-  it('Even weird tags are recognized', async () => {
-    const result = await getTagsFromContent(
-      `#abc1 #Abc2 #kek_lol-lmao #SomeFancy日本語でTag #123a`
-    );
-    expect(result).toEqual([
-      'abc1',
-      'Abc2',
-      'kek_lol-lmao',
-      'SomeFancy日本語でTag',
-      '123a',
-    ]);
-  });
-
-  it('Obscure tags are not recognized', async () => {
-    const result = await getTagsFromContent(`#a+b #123`);
-    expect(result).toEqual(['a']);
-  });
-
-  it('mixed tag styles work', async () => {
-    const result = await getTagsFromContent(`#random_tag_3`);
-    expect(result).toEqual(['random_tag_3']);
-  });
-});
-
-describe('getNotesFromTags', () => {
-  it('should return files with specified tags 1', async () => {
-    const mockVault = new Obsidian.Vault();
-    const tags = ['tag1'];
-    const expectedPaths = ['test/test2/note1.md', 'note4.md'];
-
-    const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
-
-    expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
-    expect(resultPaths.length).toEqual(expectedPaths.length);
-  });
-
-  it('should return files with specified tags 2', async () => {
-    const mockVault = new Obsidian.Vault();
-    const tags = ['#tag3'];
-    const expectedPaths = ['test/note2.md'];
-
-    const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
-
-    expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
-    expect(resultPaths.length).toEqual(expectedPaths.length);
-  });
-
-  it('should return an empty array if no files match the specified nonexistent tags', async () => {
-    const mockVault = new Obsidian.Vault();
-    const tags = ['nonexistentTag'];
-    const expected: string[] = [];
-
-    const result = await getNotesFromTags(mockVault, tags);
-
-    expect(result).toEqual(expected);
-  });
-
-  it('should handle multiple tags, returning files that match any of them', async () => {
-    const mockVault = new Obsidian.Vault();
-    const tags = ['tag2', 'tag4']; // Files that include 'tag2' or 'tag4'
-    const expectedPaths = ['test/test2/note1.md', 'test/note2.md', 'note4.md'];
-
-    const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
-
-    expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
-    expect(resultPaths.length).toEqual(expectedPaths.length);
-  });
-
-  it('should handle both path and tags, returning files under the specified path with the specified tags', async () => {
-    const mockVault = new Obsidian.Vault();
-    const tags = ['tag1'];
-    const noteFiles = [
-      { path: 'test/test2/note1.md' },
-      { path: 'test/note2.md' },
-    ] as TFile[];
-    const expectedPaths = ['test/test2/note1.md'];
-
-    const result = await getNotesFromTags(mockVault, tags, noteFiles);
-    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
-
-    expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
-    expect(resultPaths.length).toEqual(expectedPaths.length);
+    expect(tags).toEqual(['tag1', 'tag4', 'some_hashtag']);
   });
 });
