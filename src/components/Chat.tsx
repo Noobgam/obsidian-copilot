@@ -97,6 +97,21 @@ const Chat: React.FC<ChatProps> = ({
   const [currentlyEditedMessageId, setCurrentlyEditedMessageId] = useState<
     string | undefined
   >(undefined);
+  const [toolsEnabled, setToolsEnabledRaw] = useState(false);
+  const setToolsEnabled = useCallback(
+    async (toolsEnabled: boolean) => {
+      // because tools use separate chain we just make sure the memory is set correctly.
+      // TODO: remake this, `addChatMessage` and `addMessage` should not be separate hooks.
+      clearMessages();
+      clearChatMemory();
+      for (const chatMessage of chatHistory) {
+        addMessage(chatMessage);
+        await addChatMessage(chatMessage);
+      }
+      setToolsEnabledRaw(toolsEnabled);
+    },
+    [setToolsEnabledRaw, addChatMessage, clearChatMemory, clearMessages]
+  );
 
   const launchAIResponse = useCallback(
     async ({
@@ -115,6 +130,7 @@ const Chat: React.FC<ChatProps> = ({
         setAbortController,
         {
           debug,
+          useTools: toolsEnabled,
           ...(extraOptions ? extraOptions : {}),
         }
       );
@@ -126,6 +142,7 @@ const Chat: React.FC<ChatProps> = ({
       addMessage,
       setCurrentAiMessage,
       setAbortController,
+      toolsEnabled,
       debug,
     ]
   );
@@ -562,6 +579,8 @@ const Chat: React.FC<ChatProps> = ({
             onForceRebuildActiveNoteContext={forceRebuildActiveNoteContext}
             addMessage={addMessage}
             vault={vault}
+            toolsEnabled={toolsEnabled}
+            setToolsEnabled={setToolsEnabled}
           />
           <ChatInput
             inputMessage={inputMessage}

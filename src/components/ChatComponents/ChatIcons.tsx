@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 
 import { ChainType } from '@/chainFactory';
 import {
+  HammerIcon,
   RefreshIcon,
   SaveAsNoteIcon,
   SendActiveNoteToPromptIcon,
@@ -26,6 +27,8 @@ interface ChatIconsProps {
   onForceRebuildActiveNoteContext: () => void;
   addMessage: (message: ChatMessage) => void;
   vault: Vault;
+  toolsEnabled: boolean;
+  setToolsEnabled: (toolsEnabled: boolean) => void;
 }
 
 const ChatIcons: React.FC<ChatIconsProps> = ({
@@ -40,6 +43,8 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
   onForceRebuildActiveNoteContext,
   addMessage,
   vault,
+  toolsEnabled,
+  setToolsEnabled,
 }) => {
   const [selectedChain, setSelectedChain] = useState<ChainType>(currentChain);
 
@@ -78,7 +83,7 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
         sender: AI_SENDER,
         message: `OK Feel free to ask me questions about [[${noteName}]]. \n\nPlease note that this is a retrieval-based QA for notes longer than the model context window. Specific questions are encouraged. For generic questions like 'give me a summary', 'brainstorm based on the content', Chat mode with *Send Note to Prompt* button used with a *long context model* is a more suitable choice. \n\n(A new mode will be added to work on the entire vault next)`,
         isVisible: true,
-        isInChain: true,
+        isInChain: false,
         id: generateMessageId(),
       };
       addMessage(activeNoteOnMessage);
@@ -146,6 +151,18 @@ const ChatIcons: React.FC<ChatIconsProps> = ({
           New Chat
           <br />
           (unsaved history will be lost)
+        </span>
+      </button>
+      <button
+        className="chat-icon-button"
+        onClick={() => setToolsEnabled(!toolsEnabled)}
+      >
+        <HammerIcon
+          className="icon-scaler"
+          stroke={toolsEnabled ? '#897000' : undefined}
+        />
+        <span className="tooltip-text">
+          {!toolsEnabled ? 'Enable tools' : 'Disable tools'}
         </span>
       </button>
       <button className="chat-icon-button" onClick={onSaveAsNote}>

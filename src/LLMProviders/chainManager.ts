@@ -17,11 +17,22 @@ import {
 import { MultiQueryRetriever } from 'langchain/retrievers/multi_query';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { Notice } from 'obsidian';
+import { Notice, Vault } from 'obsidian';
 import ChatModelManager from './chatModelManager';
 import EmbeddingsManager from './embeddingManager';
 import MemoryManager from './memoryManager';
 import PromptManager from './promptManager';
+import { CopilotTool } from '@/tools/tools';
+import { VaultTagListTool } from '@/tools/vault/vaultTagListTool';
+import { AgentExecutor, createOpenAIFunctionsAgent } from 'langchain/agents';
+import { VaultReadNotesByTagsTool } from '@/tools/vault/vaultReadNotesByTagsTool';
+
+export type RunChainOptions = {
+  debug?: boolean;
+  ignoreSystemMessage?: boolean;
+  updateLoading?: (loading: boolean) => void;
+  useTools?: boolean;
+};
 
 export default class ChainManager {
   private static chain: RunnableSequence;
@@ -36,10 +47,12 @@ export default class ChainManager {
   public chatModelManager: ChatModelManager;
   public langChainParams: LangChainParams;
   public memoryManager: MemoryManager;
+  public toolsUsed: CopilotTool[];
 
   private constructor(
     langChainParams: LangChainParams,
-    encryptionService: EncryptionService
+    encryptionService: EncryptionService,
+    vault: Vault
   ) {
     // Instantiate singletons
     this.langChainParams = langChainParams;
@@ -50,19 +63,25 @@ export default class ChainManager {
       encryptionService
     );
     this.promptManager = PromptManager.getInstance(this.langChainParams);
+    this.toolsUsed = [
+      new VaultTagListTool(),
+      new VaultReadNotesByTagsTool(vault),
+    ];
   }
 
   /**
    * Constructor for initializing langChainParams and instantiating singletons.
-   *
-   * @param {LangChainParams} langChainParams - the parameters for language chaining
-   * @return {void}
-   */
+   **/
   static async create(
     langChainParams: LangChainParams,
-    encryptionService: EncryptionService
+    encryptionService: EncryptionService,
+    vault: Vault
   ): Promise<ChainManager> {
-    const chainManager = new ChainManager(langChainParams, encryptionService);
+    const chainManager = new ChainManager(
+      langChainParams,
+      encryptionService,
+      vault
+    );
     await chainManager.createChainWithNewModel(
       langChainParams.modelDisplayName
     );
@@ -253,16 +272,49 @@ export default class ChainManager {
     }
   }
 
+  // this method doesn't actually invoke the chain, it fakes the execution
+  private async runAgentChain(
+    userMessage: string,
+    abortController: AbortController,
+    updateCurrentAiMessage: (message: string) => void,
+    addMessage: (message: ChatMessage) => void,
+    options: Omit<RunChainOptions, 'useTools'> = {}
+  ) {
+    const agent = await createOpenAIFunctionsAgent({
+      llm: this.chatModelManager.getChatModel(),
+      tools: this.toolsUsed,
+      prompt: this.promptManager.getAgentPrompt(),
+    });
+    const agentExecutor = new AgentExecutor({
+      agent,
+      tools: this.toolsUsed,
+      returnIntermediateSteps: true,
+      // we should revise this.
+      // I think ideally we'd want to have full visibility in the chatbox, but for now lets keep it at some reasonable limit
+      maxIterations: 10,
+    });
+    const result = await agentExecutor.invoke({
+      input: userMessage,
+      history: await this.memoryManager.getMemory().chatHistory.getMessages(),
+    });
+    if (options.debug) {
+      console.log(result);
+    }
+    addMessage({
+      message: result.output,
+      sender: AI_SENDER,
+      isVisible: true,
+      isInChain: true,
+      id: generateMessageId(),
+    });
+  }
+
   async runChain(
     userMessage: string,
     abortController: AbortController,
     updateCurrentAiMessage: (message: string) => void,
     addMessage: (message: ChatMessage) => void,
-    options: {
-      debug?: boolean;
-      ignoreSystemMessage?: boolean;
-      updateLoading?: (loading: boolean) => void;
-    } = {}
+    options: RunChainOptions = {}
   ) {
     const { debug = false, ignoreSystemMessage = false } = options;
 
@@ -297,6 +349,15 @@ export default class ChainManager {
       chatContextTurns,
       chainType,
     } = this.langChainParams;
+    if (options.useTools) {
+      return this.runAgentChain(
+        userMessage,
+        abortController,
+        updateCurrentAiMessage,
+        addMessage,
+        options
+      );
+    }
 
     const memory = this.memoryManager.getMemory();
     const chatPrompt = this.promptManager.getChatPrompt();

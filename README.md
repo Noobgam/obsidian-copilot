@@ -18,7 +18,7 @@ For now the plugin is not published to obsidian community. This will be done lat
 - Download `copilot.zip`
 - Open obsidian → Settings → Community Plugins → Installed Plugins → Press on the explorer button
 - Unpack the `copilot.zip` in a new directory, for example named `copilot`
-- Press the reload button in the obsidian
+- Press the reload button in the Obsidian's "Community plugin" tab.
 
 # Main differences for now:
 
@@ -29,8 +29,8 @@ For now the plugin is not published to obsidian community. This will be done lat
 # Roadmap:
 
 - [x] Add dumb configurable context (tags)
+- [x] Create agent mode for context
+- [ ] Register obsidian-commands for agent mode (read documents by path list)
 - [ ] Get familiar with the code
 - [ ] Get a major refactoring in (rm singletons, extract classes, reactify the bad code)
 - [ ] Make the repo indexing opt-in
-- [ ] Create agent mode for context
-- [ ] Register obsidian-commands for agent mode (read documents by path list)
