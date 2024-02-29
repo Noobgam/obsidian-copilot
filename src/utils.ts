@@ -10,7 +10,7 @@ import { MemoryVariables } from '@langchain/core/memory';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { BaseChain, RetrievalQAChain } from 'langchain/chains';
 import moment from 'moment';
-import { TFile, Vault, parseYaml } from 'obsidian';
+import { TFile, Vault, App } from 'obsidian';
 
 export const isFolderMatch = (
   fileFullpath: string,
@@ -26,7 +26,7 @@ export const getNotesFromPath = async (
   vault: Vault,
   path: string
 ): Promise<TFile[]> => {
-  const files = await vault.getMarkdownFiles();
+  const files = vault.getMarkdownFiles();
 
   // Special handling for the root path '/'
   if (path === '/') {
@@ -47,31 +47,12 @@ export const getNotesFromPath = async (
 
 export async function getTagsFromNote(
   file: TFile,
-  vault: Vault
+  app: App
 ): Promise<string[]> {
-  const fileContent = await vault.cachedRead(file);
-  return getTagsFromContent(fileContent);
-}
-
-export async function getTagsFromContent(fileContent: string) {
-  let allTags: string[] = [];
-  if (fileContent.startsWith('---')) {
-    const endOfYaml = fileContent.indexOf('---', 3);
-    if (endOfYaml != -1) {
-      const noteProperties =
-        parseYaml(fileContent.substring(4, endOfYaml)) || {};
-      const noteTags = noteProperties.tags || [];
-      allTags = [...allTags, ...noteTags];
-    }
-  }
-  // this regex might not exactly match obsidian behaviour.
-  // Obsidian recognizes any alphanumeric sequence as well
-  // see the tests for the examples of tags that I have found obsidian to recognize
-  // keep in mind that in ui terms obsidian will also not recognize the tag '123' even if you put it into properties
-  const regex = /#([\p{L}\p{Nd}_-]*\p{L}[\p{L}\p{Nd}_-]*)\b/gu;
-  const regexTagMatches = fileContent.match(regex) || [];
-
-  return [...allTags, ...regexTagMatches].map(cleanTag);
+  const cachedMetadata = app.metadataCache.getFileCache(file);
+  const frontMatter = cachedMetadata?.frontmatter?.tags || [];
+  const contentTags = cachedMetadata?.tags?.map((x) => x.tag) || [];
+  return [...frontMatter, ...contentTags].map(cleanTag);
 }
 
 function cleanTag(tag: string) {
@@ -104,7 +85,7 @@ export async function getNotesFromTags(
   const filesWithTag = [];
 
   for (const file of files) {
-    const noteTags = await getTagsFromNote(file, vault);
+    const noteTags = await getTagsFromNote(file, app);
     if (tags.some((tag) => noteTags.includes(tag))) {
       filesWithTag.push(file);
     }

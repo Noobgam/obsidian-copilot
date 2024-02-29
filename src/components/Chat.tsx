@@ -300,7 +300,7 @@ const Chat: React.FC<ChatProps> = ({
     for (const file of noteFiles) {
       // Get the content of the note
       const content = await getFileContent(file, vault);
-      const tags = await getTagsFromNote(file, vault);
+      const tags = await getTagsFromNote(file, app);
       // this is a relative path, right?
       const filePath = file.path;
       if (content) {
