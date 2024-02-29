@@ -57,7 +57,7 @@ Pick OLLAMA (LOCAL) in the model dropdown and start chatting!
 
 #### Ollama for Windows (Preview)
 
-Ollama has released a Windows preview version! Just download it to your Windows machine, open your PowerShell, and 
+Ollama has released a Windows preview version! Just download it to your Windows machine, open your PowerShell, and
 
 ```
 ollama pull <model>
