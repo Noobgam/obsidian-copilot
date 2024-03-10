@@ -1,181 +1,184 @@
-import * as Obsidian from 'obsidian';
-import { TFile } from 'obsidian';
+import * as Obsidian from "obsidian";
+import { TFile } from "obsidian";
 import {
   getNotesFromPath,
   getNotesFromTags,
   isFolderMatch,
+  isPathInList,
   processVariableNameForNotePath,
-} from '../src/utils';
+} from "../src/utils";
 
-describe('isFolderMatch', () => {
-  it('should return file from the folder name 1', async () => {
-    const match = isFolderMatch('test2/note3.md', 'test2');
+describe("isFolderMatch", () => {
+  it("should return file from the folder name 1", async () => {
+    const match = isFolderMatch("test2/note3.md", "test2");
     expect(match).toEqual(true);
   });
 
-  it('should return file from the folder name 2', async () => {
-    const match = isFolderMatch('test/test2/note1.md', 'test2');
+  it("should return file from the folder name 2", async () => {
+    const match = isFolderMatch("test/test2/note1.md", "test2");
     expect(match).toEqual(true);
   });
 
-  it('should return file from the folder name 3', async () => {
-    const match = isFolderMatch('test/test2/note1.md', 'test');
+  it("should return file from the folder name 3", async () => {
+    const match = isFolderMatch("test/test2/note1.md", "test");
     expect(match).toEqual(true);
   });
 
-  it('should not return file from the folder name 1', async () => {
-    const match = isFolderMatch('test/test2/note1.md', 'tes');
+  it("should not return file from the folder name 1", async () => {
+    const match = isFolderMatch("test/test2/note1.md", "tes");
     expect(match).toEqual(false);
   });
 
-  it('should return file from file name 1', async () => {
-    const match = isFolderMatch('test/test2/note1.md', 'note1.md');
+  it("should return file from file name 1", async () => {
+    const match = isFolderMatch("test/test2/note1.md", "note1.md");
     expect(match).toEqual(true);
   });
 });
 
-describe('Vault', () => {
-  it('should return all markdown files', async () => {
+describe("Vault", () => {
+  it("should return all markdown files", async () => {
     const vault = new Obsidian.Vault();
-    const files = await vault.getMarkdownFiles();
+    const files = vault.getMarkdownFiles();
     expect(files).toEqual([
-      { path: 'test/test2/note1.md' },
-      { path: 'test/note2.md' },
-      { path: 'test2/note3.md' },
-      { path: 'note4.md' },
+      { path: "test/test2/note1.md" },
+      { path: "test/note2.md" },
+      { path: "test2/note3.md" },
+      { path: "note4.md" },
     ]);
   });
 });
 
-describe('getNotesFromPath', () => {
-  it('should return all markdown files', async () => {
+describe("getNotesFromPath", () => {
+  it("should return all markdown files", async () => {
     const vault = new Obsidian.Vault();
-    const files = await getNotesFromPath(vault, '/');
+    const files = await getNotesFromPath(vault, "/");
     expect(files).toEqual([
-      { path: 'test/test2/note1.md' },
-      { path: 'test/note2.md' },
-      { path: 'test2/note3.md' },
-      { path: 'note4.md' },
+      { path: "test/test2/note1.md" },
+      { path: "test/note2.md" },
+      { path: "test2/note3.md" },
+      { path: "note4.md" },
     ]);
   });
 
-  it('should return filtered markdown files 1', async () => {
+  it("should return filtered markdown files 1", async () => {
     const vault = new Obsidian.Vault();
-    const files = await getNotesFromPath(vault, 'test2');
+    const files = await getNotesFromPath(vault, "test2");
     expect(files).toEqual([
-      { path: 'test/test2/note1.md' },
-      { path: 'test2/note3.md' },
+      { path: "test/test2/note1.md" },
+      { path: "test2/note3.md" },
     ]);
   });
 
-  it('should return filtered markdown files 2', async () => {
+  it("should return filtered markdown files 2", async () => {
     const vault = new Obsidian.Vault();
-    const files = await getNotesFromPath(vault, 'test');
+    const files = await getNotesFromPath(vault, "test");
     expect(files).toEqual([
-      { path: 'test/test2/note1.md' },
-      { path: 'test/note2.md' },
+      { path: "test/test2/note1.md" },
+      { path: "test/note2.md" },
     ]);
   });
 
-  it('should return filtered markdown files 3', async () => {
+  it("should return filtered markdown files 3", async () => {
     const vault = new Obsidian.Vault();
-    const files = await getNotesFromPath(vault, 'note4.md');
+    const files = await getNotesFromPath(vault, "note4.md");
+    expect(files).toEqual([{ path: "note4.md" }]);
+  });
+
+  it("should return filtered markdown files 4", async () => {
+    const vault = new Obsidian.Vault();
+    const files = await getNotesFromPath(vault, "/test");
     expect(files).toEqual([
-      { path: 'note4.md' },
+      { path: "test/test2/note1.md" },
+      { path: "test/note2.md" },
     ]);
   });
 
-  it('should return filtered markdown files 4', async () => {
+  it("should not return markdown files", async () => {
     const vault = new Obsidian.Vault();
-    const files = await getNotesFromPath(vault, '/test');
-    expect(files).toEqual([
-      { path: 'test/test2/note1.md' },
-      { path: 'test/note2.md' },
-    ]);
-  });
-
-  it('should not return markdown files', async () => {
-    const vault = new Obsidian.Vault();
-    const files = await getNotesFromPath(vault, '');
+    const files = await getNotesFromPath(vault, "");
     expect(files).toEqual([]);
   });
 
-  describe('processVariableNameForNotePath', () => {
-    it('should return the note md filename', () => {
-      const variableName = processVariableNameForNotePath('[[test]]');
-      expect(variableName).toEqual('test.md');
+  describe("processVariableNameForNotePath", () => {
+    it("should return the note md filename", () => {
+      const variableName = processVariableNameForNotePath("[[test]]");
+      expect(variableName).toEqual("test.md");
     });
 
-    it('should return the note md filename with extra spaces 1', () => {
-      const variableName = processVariableNameForNotePath(' [[  test]]');
-      expect(variableName).toEqual('test.md');
+    it("should return the note md filename with extra spaces 1", () => {
+      const variableName = processVariableNameForNotePath(" [[  test]]");
+      expect(variableName).toEqual("test.md");
     });
 
-    it('should return the note md filename with extra spaces 2', () => {
-      const variableName = processVariableNameForNotePath('[[ test   ]] ');
-      expect(variableName).toEqual('test.md');
+    it("should return the note md filename with extra spaces 2", () => {
+      const variableName = processVariableNameForNotePath("[[ test   ]] ");
+      expect(variableName).toEqual("test.md");
     });
 
-    it('should return the note md filename with extra spaces 2', () => {
-      const variableName = processVariableNameForNotePath(' [[ test note   ]] ');
-      expect(variableName).toEqual('test note.md');
+    it("should return the note md filename with extra spaces 2", () => {
+      const variableName = processVariableNameForNotePath(
+        " [[ test note   ]] ",
+      );
+      expect(variableName).toEqual("test note.md");
     });
 
-    it('should return the note md filename with extra spaces 2', () => {
-      const variableName = processVariableNameForNotePath(' [[    test_note note   ]] ');
-      expect(variableName).toEqual('test_note note.md');
+    it("should return the note md filename with extra spaces 2", () => {
+      const variableName = processVariableNameForNotePath(
+        " [[    test_note note   ]] ",
+      );
+      expect(variableName).toEqual("test_note note.md");
     });
 
-    it('should return folder path with leading slash', () => {
-      const variableName = processVariableNameForNotePath('/testfolder');
-      expect(variableName).toEqual('/testfolder');
+    it("should return folder path with leading slash", () => {
+      const variableName = processVariableNameForNotePath("/testfolder");
+      expect(variableName).toEqual("/testfolder");
     });
 
-    it('should return folder path without slash', () => {
-      const variableName = processVariableNameForNotePath('testfolder');
-      expect(variableName).toEqual('testfolder');
+    it("should return folder path without slash", () => {
+      const variableName = processVariableNameForNotePath("testfolder");
+      expect(variableName).toEqual("testfolder");
     });
 
-    it('should return folder path with trailing slash', () => {
-      const variableName = processVariableNameForNotePath('testfolder/');
-      expect(variableName).toEqual('testfolder/');
+    it("should return folder path with trailing slash", () => {
+      const variableName = processVariableNameForNotePath("testfolder/");
+      expect(variableName).toEqual("testfolder/");
     });
 
-    it('should return folder path with leading spaces', () => {
-      const variableName = processVariableNameForNotePath('  testfolder ');
-      expect(variableName).toEqual('testfolder');
+    it("should return folder path with leading spaces", () => {
+      const variableName = processVariableNameForNotePath("  testfolder ");
+      expect(variableName).toEqual("testfolder");
     });
   });
 });
 
-describe('getNotesFromTags', () => {
-  it('should return files with specified tags 1', async () => {
+describe("getNotesFromTags", () => {
+  it("should return files with specified tags 1", async () => {
     const mockVault = new Obsidian.Vault();
-    const tags = ['tag1'];
-    const expectedPaths = ['test/test2/note1.md', 'note4.md'];
+    const tags = ["tag1"];
+    const expectedPaths = ["test/test2/note1.md", "note4.md"];
 
     const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);
   });
 
-  it('should return files with specified tags 2', async () => {
+  it("should return files with specified tags 2", async () => {
     const mockVault = new Obsidian.Vault();
-    const tags = ['#tag3'];
-    const expectedPaths = ['test/note2.md'];
+    const tags = ["#tag3"];
+    const expectedPaths = ["test/note2.md"];
 
     const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);
   });
 
-  it('should return an empty array if no files match the specified nonexistent tags', async () => {
+  it("should return an empty array if no files match the specified nonexistent tags", async () => {
     const mockVault = new Obsidian.Vault();
-    const tags = ['nonexistentTag'];
+    const tags = ["nonexistentTag"];
     const expected: string[] = [];
 
     const result = await getNotesFromTags(mockVault, tags);
@@ -183,31 +186,87 @@ describe('getNotesFromTags', () => {
     expect(result).toEqual(expected);
   });
 
-  it('should handle multiple tags, returning files that match any of them', async () => {
+  it("should handle multiple tags, returning files that match any of them", async () => {
     const mockVault = new Obsidian.Vault();
-    const tags = ['tag2', 'tag4']; // Files that include 'tag2' or 'tag4'
-    const expectedPaths = ['test/test2/note1.md', 'test/note2.md', 'note4.md'];
+    const tags = ["tag2", "tag4"]; // Files that include 'tag2' or 'tag4'
+    const expectedPaths = ["test/test2/note1.md", "test/note2.md", "note4.md"];
 
     const result = await getNotesFromTags(mockVault, tags);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);
   });
 
-  it('should handle both path and tags, returning files under the specified path with the specified tags', async () => {
+  it("should handle both path and tags, returning files under the specified path with the specified tags", async () => {
     const mockVault = new Obsidian.Vault();
-    const tags = ['tag1'];
+    const tags = ["tag1"];
     const noteFiles = [
-      { path: 'test/test2/note1.md' },
-      { path: 'test/note2.md' },
+      { path: "test/test2/note1.md" },
+      { path: "test/note2.md" },
     ] as TFile[];
-    const expectedPaths = ['test/test2/note1.md'];
+    const expectedPaths = ["test/test2/note1.md"];
 
     const result = await getNotesFromTags(mockVault, tags, noteFiles);
-    const resultPaths = result.map(fileWithTags => fileWithTags.path);
+    const resultPaths = result.map((fileWithTags) => fileWithTags.path);
 
     expect(resultPaths).toEqual(expect.arrayContaining(expectedPaths));
     expect(resultPaths.length).toEqual(expectedPaths.length);
+  });
+});
+
+describe("isPathInList", () => {
+  it("should exclude a file path that exactly matches an excluded path", () => {
+    const result = isPathInList("test/folder/note.md", "test/folder");
+    expect(result).toBe(true);
+  });
+
+  it("should not exclude a file path if there is no match", () => {
+    const result = isPathInList("test/folder/note.md", "another/folder");
+    expect(result).toBe(false);
+  });
+
+  it("should exclude a file path that matches an excluded path with leading slash", () => {
+    const result = isPathInList("test/folder/note.md", "/test/folder");
+    expect(result).toBe(true);
+  });
+
+  it("should exclude a note title that matches an excluded path with surrounding [[ and ]]", () => {
+    const result = isPathInList("test/folder/note1.md", "[[note1]]");
+    expect(result).toBe(true);
+  });
+
+  it("should be case insensitive when excluding a file path", () => {
+    const result = isPathInList("Test/Folder/Note.md", "test/folder");
+    expect(result).toBe(true);
+  });
+
+  it("should handle multiple excluded paths separated by commas", () => {
+    const result = isPathInList(
+      "test/folder/note.md",
+      "another/folder,test/folder",
+    );
+    expect(result).toBe(true);
+  });
+
+  it("should not exclude a file path if it partially matches an excluded path without proper segmentation", () => {
+    const result = isPathInList("test/folder123/note.md", "test/folder");
+    expect(result).toBe(false);
+  });
+
+  it("should exclude a file path that matches any one of multiple excluded paths", () => {
+    const result = isPathInList(
+      "test/folder/note.md",
+      "another/folder, test/folder, yet/another/folder",
+    );
+    expect(result).toBe(true);
+  });
+
+  it("should trim spaces around excluded paths", () => {
+    const result = isPathInList(
+      "test/folder/note.md",
+      " another/folder , test/folder ",
+    );
+    expect(result).toBe(true);
   });
 });
