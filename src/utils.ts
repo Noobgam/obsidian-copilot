@@ -23,18 +23,26 @@ export const isFolderMatch = (
   return fileSegments.includes(inputPath.toLowerCase());
 };
 
-export function getNotePathFromTitle(
+export async function getNoteFileFromTitle(
   vault: Vault,
   noteTitle: string,
-): string | null {
-  const noteFileName = `${noteTitle}.md`; // TODO: Support other file extensions
-  const abstractFile = vault.getAbstractFileByPath(noteFileName);
+): Promise<TFile | null> {
+  // Get all markdown files in the vault
+  const files = vault.getMarkdownFiles();
 
-  if (abstractFile) {
-    return abstractFile.path;
-  } else {
-    return null; // Note not found
+  // Iterate through all files to find a match by title
+  for (const file of files) {
+    // Extract the title from the filename by removing the extension
+    const title = file.basename;
+
+    if (title === noteTitle) {
+      // If a match is found, return the file path
+      return file;
+    }
   }
+
+  // If no match is found, return null
+  return null;
 }
 
 export const getNotesFromPath = async (
@@ -493,6 +501,22 @@ export function extractChatHistory(
   return chatHistory;
 }
 
+export function extractNoteTitles(query: string): string[] {
+  // Use a regular expression to extract note titles wrapped in [[]]
+  const regex = /\[\[(.*?)\]\]/g;
+  const matches = query.match(regex);
+  const uniqueTitles = new Set(
+    matches ? matches.map((match) => match.slice(2, -2)) : [],
+  );
+  return Array.from(uniqueTitles);
+}
+
+/**
+ * Process the variable name to generate a note path if it's enclosed in double brackets, otherwise return the variable name as is.
+ *
+ * @param {string} variableName - The name of the variable to process
+ * @return {string} The processed note path or the variable name itself
+ */
 export function processVariableNameForNotePath(variableName: string): string {
   variableName = variableName.trim();
   // Check if the variable name is enclosed in double brackets indicating it's a note
